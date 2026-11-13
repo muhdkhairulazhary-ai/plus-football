@@ -1,0 +1,11 @@
+# TEMPLATE ONLY: deliberately not a root wrangler.toml.
+# Verify actual project name and static output directory before adopting.
+name = "plus-football"
+pages_build_output_dir = "../public"
+compatibility_date = "2026-11-13"
+
+# Only a FUTURE preview binding is illustrated. Production remains unbound.
+[[env.preview.durable_objects.bindings]]
+name = "FOOTBALL_QUOTA"
+class_name = "FootballQuota"
+script_name = "plus-football-quota-preview"

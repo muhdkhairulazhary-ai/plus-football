@@ -1,0 +1,18 @@
+# TEMPLATE ONLY. No real account, secret or production route is configured.
+name = "plus-football-quota-preview"
+main = "src/index.mjs"
+compatibility_date = "2026-11-13"
+workers_dev = false
+preview_urls = false
+
+[vars]
+# Disabled until owner confirms an API budget. Never infer the provider quota.
+API_FOOTBALL_DAILY_BUDGET = "0"
+
+[[durable_objects.bindings]]
+name = "FOOTBALL_QUOTA"
+class_name = "FootballQuota"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["FootballQuota"]

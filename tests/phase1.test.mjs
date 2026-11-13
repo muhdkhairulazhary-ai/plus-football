@@ -2,29 +2,19 @@
 // No live API requests. All Cloudflare and upstream calls are mocked.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { harness } from './helpers.mjs';
 
-const source = await readFile(new URL('../functions/api/football.js', import.meta.url), 'utf8');
-const { onRequestGet } = await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 const validateDate = d => /^\d{4}-\d{2}-\d{2}$/.test(d) &&
   Number.isFinite(Date.parse(d+'T00:00:00Z')) &&
   new Date(d+'T00:00:00Z').toISOString().slice(0,10) === d;
 
 async function request(query) {
-  let calls = 0;
-  const oldFetch = globalThis.fetch;
-  const oldCaches = globalThis.caches;
-  globalThis.caches = { default: { match: async () => undefined, put: async () => {} } };
-  globalThis.fetch = async () => { calls++; return Response.json({response:[],results:0,paging:null}); };
+  const h = harness();
   try {
-    const response = await onRequestGet({
-      request: new Request('https://example.test/api/football?' + query),
-      env: { API_FOOTBALL_KEY: 'test-only-fake-key' }
-    });
-    return { status: response.status, calls };
+    const response = await h.request(query);
+    return { status: response.status, calls: h.calls.length };
   } finally {
-    globalThis.fetch = oldFetch;
-    globalThis.caches = oldCaches;
+    h.close();
   }
 }
 test('valid date is accepted by calendar logic', () => {

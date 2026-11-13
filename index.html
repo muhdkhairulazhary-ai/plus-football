@@ -68,7 +68,7 @@ const todayMY=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur',year
 apiDate.value=todayMY;
 apiCheck.addEventListener('click',async()=>{
   const date=apiDate.value;
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)){apiResults.replaceChildren(safeText('p','Pilih tarikh yang sah.'));return}
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date+'T00:00:00Z')) || new Date(date+'T00:00:00Z').toISOString().slice(0,10)!==date){apiResults.replaceChildren(safeText('p','Pilih tarikh yang sah.'));return}
   apiCheck.disabled=true;
   apiResults.replaceChildren(safeText('p','Sedang menyemak data API-Football...'));
   try{

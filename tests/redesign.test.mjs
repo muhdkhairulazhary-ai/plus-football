@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import vm from 'node:vm';
+const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+const js=await readFile(new URL('../app.js',import.meta.url),'utf8');
+const base=execFileSync('git',['show','fdb99a9:index.html'],{encoding:'utf8'});
+const newsBlock=s=>s.slice(s.indexOf('const news='),s.indexOf('const sportsCache'));
+test('all original news records and source attribution preserved byte for byte',()=>{assert.equal(newsBlock(js),newsBlock(base));const news=vm.runInNewContext(newsBlock(js)+';news');assert.equal(new Set(news.map(x=>x.id)).size,news.length);assert.equal(news.filter(n=>n.verified).length,11)});
+test('original image assets and API function unchanged from main baseline',()=>{assert.equal(execFileSync('git',['diff','fdb99a9','--','images','functions/api/football.js'],{encoding:'utf8'}),'')});
+test('JavaScript parses and public API paths remain the same',()=>{new vm.Script(js);assert(js.includes("fetch('/api/football?endpoint=fixtures&date='"));assert(js.includes("https://www.thesportsdb.com/api/v1/json/123/"))});
+test('navigation targets exist and local resources resolve',async()=>{for(const id of ['berita','skor','perlawanan','kedudukan','statistik','tentang'])assert(html.includes(`id="${id}"`));for(const file of ['styles.css','app.js']){assert(html.includes(file));await readFile(new URL('../'+file,import.meta.url))}});
+test('styles provide reduced motion, safe areas and square editorial artwork',async()=>{const css=await readFile(new URL('../styles.css',import.meta.url),'utf8');assert(css.includes('prefers-reduced-motion:reduce'));assert(css.includes('safe-area-inset-top'));assert(css.includes('aspect-ratio:1/1'));assert(css.includes('object-fit:contain'))});

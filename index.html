@@ -109,29 +109,27 @@
 <div class="empty" id="empty" hidden>Tiada berita dijumpai. Cuba kata kunci lain.</div>
 </section>
 <section id="skor" class="page-panel">
-<h2 class="section-title">LIVE SCORE <span>&amp; KEPUTUSAN</span>
-</h2>
-<p class="panel-intro">Ikuti perlawanan pilihan anda. Liputan terhad; bukan skor langsung masa nyata.</p>
-<div class="standings-panel">
-<div class="eyebrow">DATA PERLAWANAN · THE SPORTS DB</div>
-<div class="standings-tabs" role="group" aria-label="Liga untuk skor">
-<button type="button" aria-pressed="false" data-score="4328">EPL</button>
-<button type="button" aria-pressed="false" data-score="4480">UCL</button>
-<button type="button" aria-pressed="false" data-score="4792">LIGA SUPER</button>
-</div>
+<div class="mc-heading"><div><span class="eyebrow">PLUS+ FOOTBALL · MATCHDAY</span><h2 class="section-title">MATCH <span>CENTRE</span></h2></div><span class="mc-coverage">DATA TERHAD</span></div>
+<p class="panel-intro">Perlawanan pilihan anda, dalam waktu Malaysia. Sampel percuma mungkin lewat atau tidak lengkap; bukan feed langsung masa nyata.</p>
+<div class="mc-shell">
+<div class="mc-toolbar"><div class="mc-date-control"><label for="matchDate">Tarikh perlawanan · MYT</label><div class="mc-date-row"><button type="button" id="matchPrev" aria-label="Hari sebelumnya">←</button><input type="date" id="matchDate"><button type="button" id="matchNext" aria-label="Hari berikutnya">→</button><button type="button" id="matchToday">HARI INI</button></div></div><div class="mc-source-control"><label for="matchSource">Sumber data</label><select id="matchSource"><option value="sports">TheSportsDB · sampel percuma</option><option value="api">API-Football · semakan manual</option></select></div></div>
+<div class="mc-leagues standings-tabs" role="group" aria-label="Liga untuk skor"><button type="button" aria-pressed="false" data-score="4328">EPL</button><button type="button" aria-pressed="false" data-score="4480">UCL</button><button type="button" aria-pressed="false" data-score="4792">LIGA SUPER</button></div>
+<div class="mc-result-bar"><p id="matchSummary" role="status" aria-live="polite">Pilih liga untuk menyemak sampel perlawanan.</p><button type="button" id="matchRefresh" class="mc-refresh">SEMAK SEMULA ↻</button></div>
+<div id="scoreContent" class="standings-content" aria-live="polite">Data dimuatkan apabila Match Centre dibuka.</div>
+<p class="standings-note">Tarikh menapis sampel TheSportsDB yang sudah dimuatkan, tanpa panggilan API tambahan. Tiada rekod tidak bermaksud tiada perlawanan. Kedudukan liga kekal dalam panel Standings.</p>
 <details class="free-api-panel">
 <summary>Semak tarikh · API-Football <span aria-hidden="true">＋</span>
 </summary>
 <div class="eyebrow">API-FOOTBALL · FREE PLAN</div>
 <p class="standings-note">Semak perlawanan mengikut tarikh yang dibenarkan pelan percuma. Ini bukan live score penuh. Setiap semakan boleh menggunakan kuota API.</p>
 <div class="free-api-controls">
-<input type="date" id="apiMatchDate" aria-label="Tarikh perlawanan">
+<label for="apiMatchDate">Tarikh sumber API · UTC</label>
+<input type="date" id="apiMatchDate" aria-label="Tarikh sumber API dalam UTC">
 <button type="button" id="apiMatchCheck" class="pill">SEMAK TARIKH</button>
 </div>
 <div id="apiMatchResults" aria-live="polite">
 </div>
 </details>
-<div id="scoreContent" class="standings-content" aria-live="polite">Pilih liga untuk memuatkan keputusan dan perlawanan terkini.</div>
 <p class="standings-note">Sumber TheSportsDB (API percuma). Keputusan mungkin lewat; setiap permintaan liga hanya mengembalikan sebahagian kecil perlawanan. Bukan skor langsung masa nyata.</p>
 </div>
 </section>
@@ -211,6 +209,8 @@
 </div>
 </div>
 </div>
+<script src="match-data.js" defer></script>
+<script src="match-centre.js" defer></script>
 <script src="app.js" defer>
 </script>
 <script src="pwa.js" defer></script>

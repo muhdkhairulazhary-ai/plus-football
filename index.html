@@ -3,14 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b0b0d">
+<meta name="theme-color" content="#0b0b0b">
 <meta name="description" content="plus+ Football — portal berita bola sepak Malaysia dan dunia.">
 <title>plus+ Football | Berita Bola Sepak</title>
 <link rel="stylesheet" href="styles.css">
 <meta name="plus-deploy-check" content="standings-2026-11-10">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.webmanifest?v=plus-football-brand-2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="plus+ Football">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/icons/apple-touch-icon-plus-football-v2.png">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 </head>
 <body>
@@ -28,6 +31,7 @@
 <a href="#statistik">Cari pemain</a>
 <a href="#tentang">Tentang kami</a>
 <a href="#berita">Semua berita</a>
+<a href="#tentang" data-install-guide>Pasang di iPhone</a>
 </div>
 </div>
 </div>
@@ -57,6 +61,8 @@
 </div>
 </div>
 <main class="wrap" id="main">
+<div class="pwa-notice" id="connectionNotice" role="status" aria-live="polite" hidden><p id="connectionMessage"></p><button type="button" id="connectionReload">Muat semula</button></div>
+<div class="pwa-notice" id="updateNotice" role="status" aria-live="polite" hidden><p>Versi baharu plus+ Football tersedia.</p><button type="button" id="applyUpdate">Kemas kini sekarang</button></div>
 <section class="hero" id="homeLead" aria-labelledby="homeTitle">
 <div class="edition-line">
 <span>BERITA · ANALISIS · PERLAWANAN</span>
@@ -173,6 +179,13 @@
 <h2>TENTANG <i>plus+</i> FOOTBALL</h2>
 <p>plus+ Football ialah konsep portal media bola sepak dengan identiti visual berani, ringkas dan mudah dibaca. Fokus kepada isu tempatan, EPL, Liga Juara-Juara dan bola sepak antarabangsa.</p>
 <p>Artikel yang diterbitkan disertakan tarikh dan rujukan sumber. Kandungan baharu dikemas kini selepas semakan editorial.</p>
+<details class="install-guide" id="installGuide">
+<summary>Pasang plus+ Football di iPhone</summary>
+<p>Buka laman ini dalam Safari, kemudian:</p>
+<ol><li>Tekan butang <strong>Kongsi</strong> (kotak dengan anak panah ke atas).</li><li>Pilih <strong>Add to Home Screen / Tambah ke Skrin Utama</strong>. Jika tersedia, aktifkan <strong>Open as Web App</strong>.</li><li>Tekan <strong>Add / Tambah</strong>. Buka melalui ikon plus+ pada Skrin Utama.</li></ol>
+<p>Berita tersimpan boleh dibaca di luar talian selepas muatan pertama selesai. Skor, jadual API dan carian pemain memerlukan internet. iPhone boleh memadam storan laman; akses offline tidak dijamin.</p>
+<p id="standaloneStatus" hidden>Aplikasi sedang dibuka dalam mod standalone.</p>
+</details>
 </section>
 </main>
 <footer class="footer">
@@ -180,6 +193,7 @@
 <span>© <span id="year">
 </span> plus+ Football. All rights reserved.</span>
 <span>DARI MALAYSIA. UNTUK PEMINAT BOLA.</span>
+<button type="button" id="installButton" class="install-button">Pasang di iPhone</button>
 </div>
 </footer>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -199,5 +213,6 @@
 </div>
 <script src="app.js" defer>
 </script>
+<script src="pwa.js" defer></script>
 </body>
 </html>

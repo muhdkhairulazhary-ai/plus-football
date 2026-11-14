@@ -31,3 +31,11 @@ Provenance dan syarat penggunaan foto: `images/PHOTO-LICENSES.md` dan
 Skor sedia ada masih menggunakan TheSportsDB dan semakan tarikh API-Football
 memerlukan klik. Homepage tidak membuat panggilan API bola sepak automatik.
 Kedudukan liga ialah snapshot sedia ada bertarikh, bukan data langsung.
+
+PWA tests and cache-release instructions are in `docs/PWA.md`:
+
+```sh
+node scripts/update-pwa-cache.mjs --check
+node --test --test-isolation=none tests/pwa.test.mjs
+python tests/pwa_browser.py
+```

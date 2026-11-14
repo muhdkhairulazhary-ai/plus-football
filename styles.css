@@ -248,3 +248,16 @@ to{opacity:1;transform:none}
 .modal-photo>.art{max-height:560px;aspect-ratio:auto;height:min(80vw,560px)}
 .modal-photo>.photo-credit{font-size:12px}
 @media(max-width:640px){.modal-photo>.art{height:auto;aspect-ratio:1/1;max-height:none}.story-photo>.photo-credit{font-size:11px;padding:12px}.photo-credit a{overflow-wrap:anywhere}}
+/* iPhone PWA: installation, connection state, safe areas and touch controls. */
+.pwa-notice{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid #70503b;background:#251e18;padding:14px 16px;margin-top:16px;font-size:12px;line-height:1.6}
+.pwa-notice p{margin:0;color:#f3dfc6;flex:1}
+.pwa-notice button,.install-button{min-height:44px;padding:10px 14px;background:#252830;color:#fff;border:1px solid #646973;border-radius:3px;font-size:12px;cursor:pointer}
+.pwa-notice button:disabled{opacity:.55;cursor:default}
+.install-guide{border:1px solid var(--line);background:var(--panel);padding:18px;margin-top:24px;scroll-margin-top:195px}
+.install-guide summary{min-height:44px;cursor:pointer;font-size:16px;font-weight:750}
+.install-guide ol{padding-left:22px}.install-guide li{padding:8px 0;color:#e0e2e7}
+.offline-data>p{padding:18px;border:1px dashed #555b66;color:#d0d3dc}
+@supports(padding:max(0px)){.wrap{padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right))}}
+@media(max-width:640px){.pwa-notice{align-items:flex-start;flex-direction:column}.pwa-notice button{width:100%}.install-guide{padding:16px}.category-nav a{font-size:12px}.primary-nav a{font-size:11px}.photo-credit a{display:inline-block;min-height:24px;padding-block:2px}}
+@supports(padding:max(0px)){@media(max-width:640px){.wrap{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}}}
+@media(display-mode:standalone){body{min-height:100dvh;overscroll-behavior-y:none}.top{background:#0b0b0b}.footer{padding-bottom:calc(24px + env(safe-area-inset-bottom))}.install-button,[data-install-guide]{display:none}}

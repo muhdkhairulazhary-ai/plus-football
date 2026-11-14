@@ -236,3 +236,15 @@ to{opacity:1;transform:none}
 *,*::before,*::after{animation:none!important;transition:none!important}
 }
 
+/* Licensed archive photography: preserve subjects, trophy and source watermark. */
+.story-photo,.modal-photo{margin:0;min-width:0;background:#101216}
+.story-photo>.art,.modal-photo>.art{width:100%;aspect-ratio:1/1}
+.photo-art{background:#101216}
+.photo-art.image-failed{background:radial-gradient(ellipse at 20% 20%,#6c1d2d,#17171c 65%)}
+.story-photo>.photo-credit,.modal-photo>.photo-credit{margin:0;padding:12px 14px;font-size:11px;line-height:1.65;color:#c0c3cb;overflow-wrap:anywhere;border-bottom:1px solid var(--line)}
+.photo-credit a{color:#e4e6ec;text-decoration:underline;text-underline-offset:2px}
+.photo-credit span{display:block;margin-bottom:6px}
+.modal-photo{margin-top:22px;margin-bottom:22px}
+.modal-photo>.art{max-height:560px;aspect-ratio:auto;height:min(80vw,560px)}
+.modal-photo>.photo-credit{font-size:12px}
+@media(max-width:640px){.modal-photo>.art{height:auto;aspect-ratio:1/1;max-height:none}.story-photo>.photo-credit{font-size:11px;padding:12px}.photo-credit a{overflow-wrap:anywhere}}

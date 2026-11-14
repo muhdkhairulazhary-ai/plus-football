@@ -20,6 +20,14 @@ Tiada suite ujian sedia ada pada commit asas main. Suite di atas memeriksa
 pemeliharaan berita/aset/API, navigasi, carian, modal/fokus, panel liga, skor
 0–0, skeleton, retry, respons async lama, fallback Liga Super dan overflow.
 
+Foto berita 14–16 kini turut diuji: versi WebP lokal/srcset, alt text, kredit
+dan lesen, gambar featured/modal, fallback apabila kedua-dua versi imej gagal,
+serta pembersihan media modal ketika bertukar artikel. Fakta artikel dibandingkan
+dengan baseline; hanya medan media bagi tiga rekod itu dibenarkan berubah.
+Semua aset asal diperiksa byte demi byte, walaupun aset foto baharu ditambah.
+Provenance dan syarat penggunaan foto: `images/PHOTO-LICENSES.md` dan
+`images/photo-credits.json`. Browser suite memintas WebP lokal tanpa hotlink.
+
 Skor sedia ada masih menggunakan TheSportsDB dan semakan tarikh API-Football
 memerlukan klik. Homepage tidak membuat panggilan API bola sepak automatik.
 Kedudukan liga ialah snapshot sedia ada bertarikh, bukan data langsung.

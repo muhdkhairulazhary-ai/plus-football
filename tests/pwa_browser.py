@@ -3,6 +3,8 @@ External hosts are blocked at Chromium DNS resolution; no live football APIs.
 Run: python tests/pwa_browser.py
 """
 import asyncio,json,re,threading,unittest
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from http.server import ThreadingHTTPServer,BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlparse,unquote
@@ -17,7 +19,7 @@ class LocalSite(BaseHTTPRequestHandler):
   if path.startswith('/api/') or path.startswith('/mock-sports/'):
    if path.startswith('/api/'):
     body={'response':[{'teams':{'home':{'name':'LOCAL MOCK Home'},'away':{'name':'LOCAL MOCK Away'}},'goals':{'home':0,'away':0},'fixture':{'status':{'short':'FT'}},'league':{'name':'LOCAL MOCK League'}}],'results':1}
-   else:body={'events':[{'strHomeTeam':'LOCAL MOCK Home','strAwayTeam':'LOCAL MOCK Away','dateEvent':'2026-11-14','strLeague':'LOCAL MOCK League','strStatus':'Match Finished','intHomeScore':0,'intAwayScore':0}]}
+   else:body={'events':[{'strHomeTeam':'LOCAL MOCK Home','strAwayTeam':'LOCAL MOCK Away','dateEvent':datetime.now(ZoneInfo('Asia/Kuala_Lumpur')).date().isoformat(),'strTime':'00:00:00','strLeague':'LOCAL MOCK League','strStatus':'Match Finished','intHomeScore':0,'intAwayScore':0}]}
    data=json.dumps(body).encode();mime='application/json'
   else:
    file=ROOT/('index.html' if path=='/' else unquote(path).lstrip('/'))
@@ -68,9 +70,9 @@ class PwaBrowser(unittest.IsolatedAsyncioTestCase):
   await self.page.locator('#installButton').click()
   self.assertTrue(await self.page.locator('#standaloneStatus').is_visible())
  async def test_suspended_page_clears_expired_score_on_resume(self):
-  await self.page.locator('[data-view="skor"]').click();await self.page.locator('.score-centre b').wait_for()
+  await self.page.locator('[data-view="skor"]').click();await self.page.locator('.mc-team-score').first.wait_for()
   await self.page.evaluate("for(const value of sportsCache.values())value.at=Date.now()-121000;window.dispatchEvent(new Event('pageshow'))")
-  self.assertEqual(await self.page.locator('.score-centre b').count(),0)
+  self.assertEqual(await self.page.locator('.mc-team-score').count(),0)
   self.assertIn('telah luput',await self.page.locator('#scoreContent').inner_text())
  async def test_versioned_icon_urls_decode_with_brand_colors(self):
   icons=await self.page.evaluate("""async()=>{
@@ -101,17 +103,17 @@ class PwaBrowser(unittest.IsolatedAsyncioTestCase):
   await self.page.goto(self.url+'/uncached-article')
   self.assertIn('Anda di luar talian',await self.page.locator('h1').inner_text())
  async def test_API_is_never_cached_and_displayed_scores_clear_offline(self):
-  await self.page.locator('[data-view="skor"]').click();await self.page.locator('.score-centre b').wait_for()
-  self.assertEqual(await self.page.locator('.score-centre b').inner_text(),'0 : 0')
+  await self.page.locator('[data-view="skor"]').click();await self.page.locator('.mc-team-score').first.wait_for()
+  self.assertEqual(await self.page.locator('.mc-team-score').first.inner_text(),'0')
   result=await self.page.evaluate('fetch("/api/football?endpoint=fixtures&date=2026-11-14").then(r=>r.json())');self.assertEqual(result['results'],1)
   self.assertFalse(any(p.startswith('/api/') or p.startswith('/mock-sports/') for p in await self.cache_keys()))
   await self.context.set_offline(True)
-  await self.page.wait_for_function('!document.querySelector(".score-centre b")')
+  await self.page.wait_for_function('!document.querySelector(".mc-team-score")')
   self.assertIn('luar talian',await self.page.locator('#scoreContent').inner_text())
   result=await self.page.evaluate('fetch("/api/football?endpoint=fixtures&date=2026-11-14").then(async r=>({status:r.status,body:await r.json()}))')
   self.assertEqual(result['status'],503);self.assertNotIn('response',result['body'])
   await self.page.reload();await self.page.locator('#scoreContent').wait_for()
-  self.assertEqual(await self.page.locator('.score-centre b').count(),0)
+  self.assertEqual(await self.page.locator('.mc-team-score').count(),0)
  async def test_network_first_new_articles_waiting_update_and_cache_cleanup(self):
   # A news/asset release is fetched fresh even before SW activation changes.
   self.server.state['version']=2

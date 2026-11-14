@@ -39,3 +39,14 @@ node scripts/update-pwa-cache.mjs --check
 node --test --test-isolation=none tests/pwa.test.mjs
 python tests/pwa_browser.py
 ```
+
+Phase 4A Match Centre adapters and free-tier audit: `docs/PHASE4A-MATCH-CENTRE.md`.
+
+```sh
+node --test --test-isolation=none tests/match-data.test.mjs
+```
+
+The shared browser suites now cover provider-status groups, MYT date selection,
+conditional details/stats/timeline, partial responses, validated collection
+retry, explicit API-Football opt-in/cooldown, unsupported MSL coverage and PWA
+offline/freshness behavior. All match/fixture/logo responses remain mocks.

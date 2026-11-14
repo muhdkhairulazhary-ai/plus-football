@@ -1,0 +1,203 @@
+/* plus+ Liquid Glass. Opaque readable baseline; progressive blur on chrome only.
+   No scroll handlers, animated filters, remote fonts or per-card backdrop layers. */
+:root {
+  --bg: #09090b;
+  --panel: #19191e;
+  --text: #fafafa;
+  --muted: #b9b9c2;
+  --line: #ffffff24;
+  --red: #ef3046;
+  --glass-chrome: #19191ef5;
+  --glass-surface: linear-gradient(145deg, #ffffff0e, #ffffff02 50%), #17171ded;
+  --glass-edge: #ffffff29;
+  --glass-shadow: 0 14px 38px #0004, inset 0 1px 0 #ffffff12;
+}
+html { scroll-padding-top: 200px; scroll-padding-bottom: 110px; }
+body {
+  background: radial-gradient(ellipse 75% 520px at 100% 0, #68172755, transparent),
+    radial-gradient(ellipse 70% 650px at 0 500px, #36364130, transparent), #09090b;
+  -webkit-text-size-adjust: 100%;
+}
+button, a, summary, input, select { touch-action: manipulation; }
+button, input, select { font-family: inherit; }
+button, a, summary { -webkit-tap-highlight-color: #ef304630; }
+:where(button, a, input, select, summary):focus-visible {
+  outline: 3px solid #ff8794; outline-offset: 4px;
+}
+.top {
+  background: var(--glass-chrome);
+  border-bottom: 1px solid var(--glass-edge);
+  box-shadow: 0 8px 30px #0002;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+.head { height: 90px; }
+.logo { color: #fff; }
+.brand-note { color: #bfbfc7; }
+.menu-toggle, .install-button, .pwa-notice button {
+  border-radius: 999px; border: 1px solid var(--glass-edge);
+  background: linear-gradient(#ffffff0e, #ffffff02), #242429;
+  box-shadow: inset 0 1px 0 #ffffff12; min-width: 44px;
+}
+.quick-menu {
+  background: #202025f7; border: 1px solid #ffffff38; border-radius: 24px;
+  padding: 8px; box-shadow: 0 24px 60px #0009, inset 0 1px 0 #ffffff18;
+  max-height: min(440px, 65dvh); overflow-y: auto;
+}
+.quick-menu a { border-radius: 15px; min-height: 48px; }
+.quick-menu a:hover, .quick-menu a:focus-visible { background: #ffffff12; }
+.primary-nav { gap: 10px; padding-bottom: 10px; }
+.primary-nav a {
+  padding: 0 20px; border: 1px solid transparent; border-radius: 999px;
+  min-height: 46px; color: #c7c7d0;
+}
+.primary-nav a[aria-current=page] {
+  color: #fff; border-color: #ffffff22;
+  background: linear-gradient(130deg, #ff576424, #ffffff06), #353037;
+  box-shadow: inset 0 1px 0 #ffffff14;
+}
+.nav-icon { width: 19px; height: 19px; flex-shrink: 0; }
+.primary-nav .status-dot { display: none; }
+.category-nav { background: #101014; border-top-color: #ffffff14; }
+.category-nav a { color: #c2c2ca; }
+.category-nav a[aria-current=true] { color: #ff8896; }
+.ticker { background: #ffffff03; border-bottom-color: #ffffff12; }
+.breaking-label { border-radius: 7px; background: #b91e32; color: #fff; }
+.hero { padding-top: 36px; }
+.hero:before { display: none; }
+.hero-heading { padding-block: 24px 32px; }
+.hero h1 { letter-spacing: -.055em; line-height: 1.04; }
+.hero h1 span { color: #ff5166; }
+.edition-line { color: #bdbdc6; }
+.lead-layout { gap: 24px; }
+.featured-story, .story, .briefs, .standings-panel, .mc-shell, .about,
+.install-guide, .free-api-panel, .pwa-notice {
+  background: var(--glass-surface); border: 1px solid var(--glass-edge);
+  border-radius: 24px; box-shadow: var(--glass-shadow);
+}
+.featured-story, .story { overflow: hidden; }
+.featured-story .body { padding: 30px; }
+.body h2 { letter-spacing: -.035em; }
+.body > p { color: #c1c1cb; }
+.body .meta, .photo-credit, .source { color: #bdbdc7; }
+.cat, .eyebrow { color: #ff8997; }
+.briefs { padding: 24px; }
+.brief-index { color: #aaaab5; }
+.brief-item { border-bottom-color: #ffffff18; }
+.brief-link { border-radius: 18px; border-color: #ff6d7f44; background: #ef304610; }
+.brief-link small { color: #d0bac1; line-height: 1.6; }
+.section-title { letter-spacing: -.04em; }
+.section-title > span { color: #bcbcc7; }
+.bar { gap: 14px; }
+.filter { border-radius: 999px; border-color: #ffffff26; background: #ffffff05; }
+.filter.active { background: #fafafa; color: #15151a; }
+.search, .free-api-controls input, .mc-date-row input, .mc-source-control select {
+  border-radius: 14px; background: #101014; color: #fafafa; border-color: #ffffff38;
+  min-height: 48px; font-size: 16px;
+}
+.search::placeholder { color: #b9b9c5; }
+.pill { border-radius: 999px; background: #bd2035; color: #fff; box-shadow: inset 0 1px 0 #ffffff26; }
+.pill:hover { background: #a71b2d; }
+.standings-panel, .mc-shell { padding: 26px; }
+.standings-tabs { gap: 7px; }
+.standings-tabs button { border-radius: 999px; border-color: #ffffff24; background: #ffffff08; }
+.standings-tabs button[aria-pressed=true] { background: #af1c30; border-color: #fa657977; color: #fff; }
+.standings-table { font-variant-numeric: tabular-nums; }
+.standings-table th { background: #ffffff08; color: #dadbe1; }
+.standings-table td, .standings-table th { border-bottom-color: #ffffff18; }
+.standings-content p, .panel-intro, .standings-note { color: #bdbdc7; }
+.mc-card { border-radius: 20px; border-color: #ffffff24; background: linear-gradient(140deg,#ffffff09,#ffffff02),#1d1d24; box-shadow: inset 0 1px 0 #ffffff0c; }
+.mc-card-top { border-bottom-color: #ffffff14; }
+.mc-status, .mc-coverage { border-radius: 999px; }
+.mc-status.live { background: #511e29; color: #ffb4bf; }
+.mc-kickoff, .mc-provenance, .mc-details dt { color: #bfc3ce; }
+.mc-date-row button, .mc-refresh, .mc-sample-days button { border-radius: 13px; background: #ffffff0a; border-color: #ffffff2b; }
+.mc-state, .error-state, .empty-state, .empty { border-radius: 20px; background: #ffffff04; }
+.mc-details { border-top-color: #ffffff18; }
+.mc-state p, .mc-date-note, .mc-timeline { color: #c2c4ce; }
+.mc-official { color: #ff91a0; }
+.free-api-panel, .install-guide { box-shadow: inset 0 1px 0 #ffffff10; }
+.about { padding: 30px; margin-block: 30px; }
+.about p { color: #c7c7d0; }
+.pwa-notice { background: #29231e; border-color: #b88b5b66; }
+.modal { background: #060609ed; overscroll-behavior-y: contain; z-index: 50; }
+.modal-inner { border-radius: 28px; background: linear-gradient(140deg,#ffffff08,transparent 45%),#19191f; border-color: #ffffff30; box-shadow: var(--glass-shadow); }
+.modal h2 { letter-spacing: -.04em; }
+.modal p { color: #e1e1e7; }
+.modal .close { border-radius: 50%; background: #36363e; border: 1px solid #ffffff26; }
+.modal-photo { border-radius: 18px; overflow: hidden; }
+.photo-credit a, .source a { color: #f3f3f7; text-underline-offset: 3px; }
+.notice { border-radius: 12px; }
+.footer { border-top-color: #ffffff18; color: #b7b7c2; }
+.skeleton { border-radius: 14px; }
+/* Only bounded, stationary chrome gets a backdrop surface. Cards never blur. */
+@supports ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
+  .top { background: #151519db; -webkit-backdrop-filter: blur(18px) saturate(120%); backdrop-filter: blur(18px) saturate(120%); }
+  .quick-menu { background: #242429ed; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .story:hover { transform: translateY(-3px); border-color: #ffffff50; }
+  .primary-nav a:hover { background-color: #ffffff0b; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .primary-nav a, .pill, .menu-toggle { transition: background-color .18s ease, transform .18s ease; }
+  .pill:active, .menu-toggle:active { transform: scale(.97); }
+}
+@media (max-width: 640px) {
+  html { scroll-padding-top: 140px; }
+  body { padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
+  /* A filtered ancestor would contain the fixed dock in Safari/Chromium. */
+  .top { background: #151519f5; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .head { height: 76px; gap: 14px; }
+  .logo { font-size: 44px; }
+  .brand-note { font-size: 8px; }
+  .menu-toggle { width: 44px; height: 44px; padding: 0; justify-content: center; }
+  .primary-nav {
+    position: fixed; top: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
+    width: auto; max-width: 440px; margin-inline: auto; padding: 6px;
+    display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 3px;
+    border: 1px solid #ffffff3b; border-radius: 29px; background: #242429fa;
+    box-shadow: 0 10px 35px #0009, inset 0 1px 0 #ffffff26;
+    overflow: visible;
+  }
+  .primary-nav a {
+    flex-direction: column; justify-content: center; gap: 5px;
+    padding: 9px 2px; min-height: 58px; min-width: 0;
+    font-size: 10px; letter-spacing: .1px; border-radius: 23px;
+  }
+  .primary-nav a[aria-current=page] { background: linear-gradient(140deg,#fb435b25,#ffffff0b); border-color: #ffffff25; }
+  .primary-nav a[aria-current=page] .nav-icon { color: #ff8a99; }
+  .category-nav > .wrap { gap: 22px; }
+  .quick-menu { width: min(280px,calc(100vw - 32px)); }
+  .hero { padding-top: 24px; }
+  .hero-heading { padding-block: 20px 26px; }
+  .hero h1 { font-size: clamp(34px,9vw,52px); }
+  .featured-story, .story, .briefs, .standings-panel, .mc-shell, .about { border-radius: 22px; }
+  .featured-story .body, .briefs { padding: 20px; }
+  .story .body { padding: 22px; }
+  .story:hover { transform: none; }
+  .standings-panel, .mc-shell { padding: 15px; }
+  .standings-tabs button { padding-inline: 15px; }
+  .mc-leagues button { padding-inline: 8px; }
+  .mc-date-row button { padding-inline: 10px; }
+  .mc-date-row input { padding-inline: 5px; }
+  .mc-heading .section-title { font-size: 33px; }
+  .mc-coverage { font-size: 8px; }
+  .about { padding: 24px 20px; }
+  .modal { padding: max(12px,env(safe-area-inset-top,0px)) 12px max(20px,env(safe-area-inset-bottom,0px)); }
+  .modal-inner { padding: 22px; margin: 8px auto; border-radius: 24px; }
+  .modal .close { margin-right: 0; }
+  .footer { padding-bottom: 28px; }
+  @supports ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
+    .primary-nav { background: #242429dc; -webkit-backdrop-filter: blur(18px) saturate(130%); backdrop-filter: blur(18px) saturate(130%); }
+  }
+}
+@media (prefers-contrast: more) {
+  :root { --muted: #dddde4; --glass-edge: #ffffff80; }
+  .top, .primary-nav, .quick-menu { background: #121215; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .story, .featured-story, .standings-panel, .mc-shell, .modal-inner { border-color: #ffffff80; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

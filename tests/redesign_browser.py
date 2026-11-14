@@ -13,7 +13,7 @@ class RedesignBrowser(unittest.IsolatedAsyncioTestCase):
  async def asyncSetUp(self):
   self.pw=await async_playwright().start()
   self.browser=await self.pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox','--disable-dev-shm-usage'])
-  self.context=await self.browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+  self.context=await self.browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True,service_workers='block')
   self.page=await self.context.new_page();self.errors=[];self.calls=[];self.offline=False;self.slow=False
   self.page.on('pageerror',lambda error:self.errors.append(str(error)))
   await self.context.route('**/*',self.route)
@@ -89,7 +89,7 @@ class RedesignBrowser(unittest.IsolatedAsyncioTestCase):
   await self.page.locator('#scoreContent .error-state').wait_for()
   self.offline=False;await self.page.locator('#scoreContent .error-state button').click()
   await self.page.locator('.score-centre b').wait_for()
-  await self.page.locator('details summary').click()
+  await self.page.locator('details.free-api-panel > summary').click()
   await self.page.locator('#apiMatchDate').fill('2024-02-29')
   await self.page.locator('#apiMatchCheck').click()
   await self.page.wait_for_function('document.querySelector("#apiMatchResults").textContent.includes("MOCK Home")')

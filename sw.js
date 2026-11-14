@@ -2,7 +2,7 @@
  * Run `node scripts/update-pwa-cache.mjs` after changing cached content.
  * Football APIs and every cross-origin request are ALWAYS network-only.
  */
-const VERSION = 'pwa-v1-66db07356fd0595e';
+const VERSION = 'pwa-v1-fdc5c64edfd543da';
 const CACHE_PREFIX = 'plus-football-static-';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
 const NETWORK_TIMEOUT_MS = 4000;

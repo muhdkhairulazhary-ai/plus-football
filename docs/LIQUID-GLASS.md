@@ -32,6 +32,14 @@ only the deterministic cache version and asset list change to include the new
 stylesheet. Existing explicit update activation/offline behavior is retained.
 No Worker, credentials or Cloudflare settings are changed.
 
+Atmosphere refinement: the page now uses a midnight charcoal gradient with broad,
+static burgundy/red radial falloffs behind the content. These create soft light
+without filter blur, fixed overlays or animation. Cards use translucent dark
+fills with fine highlights and shadows; text/photos/scores retain full opacity
+and no filters. The dock has a reflective gradient, a restrained red selection
+and a translucent supported-browser fill; its opaque baseline remains readable
+without backdrop-filter. Increased contrast restores opaque card surfaces.
+
 ## Tests
 
 ```sh

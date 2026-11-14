@@ -1,21 +1,27 @@
 /* plus+ Liquid Glass. Opaque readable baseline; progressive blur on chrome only.
    No scroll handlers, animated filters, remote fonts or per-card backdrop layers. */
 :root {
-  --bg: #09090b;
-  --panel: #19191e;
+  --bg: #101013;
+  --panel: #202024;
   --text: #fafafa;
   --muted: #b9b9c2;
   --line: #ffffff24;
   --red: #ef3046;
   --glass-chrome: #19191ef5;
-  --glass-surface: linear-gradient(145deg, #ffffff0e, #ffffff02 50%), #17171ded;
-  --glass-edge: #ffffff29;
-  --glass-shadow: 0 14px 38px #0004, inset 0 1px 0 #ffffff12;
+  --glass-surface: linear-gradient(145deg, #ffffff12, #ffffff03 48%, #ffffff06), #202024b8;
+  --glass-edge: #ffffff30;
+  --glass-shadow: 0 18px 42px #0004, 0 4px 12px #0002, inset 0 1px 0 #ffffff1c;
 }
 html { scroll-padding-top: 200px; scroll-padding-bottom: 110px; }
 body {
-  background: radial-gradient(ellipse 75% 520px at 100% 0, #68172755, transparent),
-    radial-gradient(ellipse 70% 650px at 0 500px, #36364130, transparent), #09090b;
+  /* Wide gradient falloffs create soft ambient light without filter layers.
+     The charcoal base continues down long news pages; nothing is fixed/animated. */
+  background:
+    radial-gradient(ellipse 90% 650px at 100% 220px, #85233750, transparent 85%),
+    radial-gradient(ellipse 90% 800px at 0 1050px, #641b2b38, transparent 85%),
+    radial-gradient(ellipse 80% 900px at 100% 2200px, #5c1b2926, transparent 85%),
+    linear-gradient(165deg, #1d1d22 0, #141417 35%, #101013 75%, #0d0d10 100%);
+  min-height: 100vh;
   -webkit-text-size-adjust: 100%;
 }
 button, a, summary, input, select { touch-action: manipulation; }
@@ -57,7 +63,7 @@ button, a, summary { -webkit-tap-highlight-color: #ef304630; }
 }
 .nav-icon { width: 19px; height: 19px; flex-shrink: 0; }
 .primary-nav .status-dot { display: none; }
-.category-nav { background: #101014; border-top-color: #ffffff14; }
+.category-nav { background: #16161be8; border-top-color: #ffffff14; }
 .category-nav a { color: #c2c2ca; }
 .category-nav a[aria-current=true] { color: #ff8896; }
 .ticker { background: #ffffff03; border-bottom-color: #ffffff12; }
@@ -105,7 +111,7 @@ button, a, summary { -webkit-tap-highlight-color: #ef304630; }
 .standings-table th { background: #ffffff08; color: #dadbe1; }
 .standings-table td, .standings-table th { border-bottom-color: #ffffff18; }
 .standings-content p, .panel-intro, .standings-note { color: #bdbdc7; }
-.mc-card { border-radius: 20px; border-color: #ffffff24; background: linear-gradient(140deg,#ffffff09,#ffffff02),#1d1d24; box-shadow: inset 0 1px 0 #ffffff0c; }
+.mc-card { border-radius: 20px; border-color: #ffffff2b; background: linear-gradient(140deg,#ffffff10,#ffffff03),#242428b8; box-shadow: 0 8px 22px #0002, inset 0 1px 0 #ffffff16; }
 .mc-card-top { border-bottom-color: #ffffff14; }
 .mc-status, .mc-coverage { border-radius: 999px; }
 .mc-status.live { background: #511e29; color: #ffb4bf; }
@@ -120,7 +126,7 @@ button, a, summary { -webkit-tap-highlight-color: #ef304630; }
 .about p { color: #c7c7d0; }
 .pwa-notice { background: #29231e; border-color: #b88b5b66; }
 .modal { background: #060609ed; overscroll-behavior-y: contain; z-index: 50; }
-.modal-inner { border-radius: 28px; background: linear-gradient(140deg,#ffffff08,transparent 45%),#19191f; border-color: #ffffff30; box-shadow: var(--glass-shadow); }
+.modal-inner { border-radius: 28px; background: linear-gradient(140deg,#ffffff0d,transparent 45%),#202024f5; border-color: #ffffff38; box-shadow: var(--glass-shadow); }
 .modal h2 { letter-spacing: -.04em; }
 .modal p { color: #e1e1e7; }
 .modal .close { border-radius: 50%; background: #36363e; border: 1px solid #ffffff26; }
@@ -156,8 +162,9 @@ button, a, summary { -webkit-tap-highlight-color: #ef304630; }
     left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
     width: auto; max-width: 440px; margin-inline: auto; padding: 6px;
     display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 3px;
-    border: 1px solid #ffffff3b; border-radius: 29px; background: #242429fa;
-    box-shadow: 0 10px 35px #0009, inset 0 1px 0 #ffffff26;
+    border: 1px solid #ffffff45; border-radius: 29px;
+    background: linear-gradient(165deg,#ffffff16,#ffffff03 45%,#ffffff08), #252529f5;
+    box-shadow: 0 16px 34px #0007, 0 3px 10px #0004, inset 0 1px 0 #ffffff30, inset 0 -1px 0 #ffffff0d;
     overflow: visible;
   }
   .primary-nav a {
@@ -165,7 +172,10 @@ button, a, summary { -webkit-tap-highlight-color: #ef304630; }
     padding: 9px 2px; min-height: 58px; min-width: 0;
     font-size: 10px; letter-spacing: .1px; border-radius: 23px;
   }
-  .primary-nav a[aria-current=page] { background: linear-gradient(140deg,#fb435b25,#ffffff0b); border-color: #ffffff25; }
+  .primary-nav a[aria-current=page] {
+    background: linear-gradient(145deg,#ff6b7b29,#ffffff0d), #ffffff05;
+    border-color: #ffffff32; box-shadow: inset 0 1px 0 #ffffff20, 0 3px 8px #0002;
+  }
   .primary-nav a[aria-current=page] .nav-icon { color: #ff8a99; }
   .category-nav > .wrap { gap: 22px; }
   .quick-menu { width: min(280px,calc(100vw - 32px)); }
@@ -189,13 +199,14 @@ button, a, summary { -webkit-tap-highlight-color: #ef304630; }
   .modal .close { margin-right: 0; }
   .footer { padding-bottom: 28px; }
   @supports ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
-    .primary-nav { background: #242429dc; -webkit-backdrop-filter: blur(18px) saturate(130%); backdrop-filter: blur(18px) saturate(130%); }
+    .primary-nav { background: linear-gradient(165deg,#ffffff16,#ffffff03 45%,#ffffff08), #252529c9; -webkit-backdrop-filter: blur(18px) saturate(120%); backdrop-filter: blur(18px) saturate(120%); }
   }
 }
 @media (prefers-contrast: more) {
-  :root { --muted: #dddde4; --glass-edge: #ffffff80; }
+  :root { --muted: #dddde4; --glass-edge: #ffffff80; --glass-surface: #18181c; }
   .top, .primary-nav, .quick-menu { background: #121215; -webkit-backdrop-filter: none; backdrop-filter: none; }
   .story, .featured-story, .standings-panel, .mc-shell, .modal-inner { border-color: #ffffff80; }
+  .mc-card { background: #202024; border-color: #ffffff80; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

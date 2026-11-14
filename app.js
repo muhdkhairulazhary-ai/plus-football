@@ -25,55 +25,52 @@ const apiCheck=document.getElementById('apiMatchCheck');
 const apiResults=document.getElementById('apiMatchResults');
 const todayMY=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 apiDate.value=todayMY;
+const footballClient=PlusFootballClient.create();
 let apiRequestVersion=0,apiBlockedUntil=0,apiCooldownTimer;
-function apiCooldown(seconds){
- apiBlockedUntil=Date.now()+Math.max(60,Math.min(86400,seconds||60))*1000;
- apiCheck.disabled=true;apiCheck.textContent='TUNGGU '+Math.ceil((apiBlockedUntil-Date.now())/1000)+' SAAT';
- clearTimeout(apiCooldownTimer);apiCooldownTimer=setTimeout(()=>{apiCheck.disabled=!navigator.onLine;apiCheck.textContent='SEMAK TARIKH'},apiBlockedUntil-Date.now());
-}
+footballClient.subscribe(until=>{
+ apiBlockedUntil=until;apiCheck.disabled=true;apiCheck.textContent='TUNGGU '+Math.ceil((until-Date.now())/1000)+' SAAT';
+ clearTimeout(apiCooldownTimer);apiCooldownTimer=setTimeout(()=>{apiCheck.disabled=!navigator.onLine;apiCheck.textContent='SEMAK TARIKH'},Math.max(1,until-Date.now()));
+});
 apiCheck.addEventListener('click',async()=>{
-  if(!navigator.onLine){apiResults.replaceChildren(safeText('p','Di luar talian. Skor memerlukan sambungan internet.'));return}
-  if(Date.now()<apiBlockedUntil)return;
-  const requestVersion=++apiRequestVersion;
-  const date=apiDate.value;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+'T00:00:00Z'))||new Date(date+'T00:00:00Z').toISOString().slice(0,10)!==date){apiResults.replaceChildren(safeText('p','Pilih tarikh yang sah.'));return}
-  apiCooldown(60);
-  apiResults.replaceChildren(safeText('p','Sedang menyemak data API-Football...'));
-  try{
-    const controller=new AbortController();
-    const timeout=setTimeout(()=>controller.abort(),12000);
-    let res;
-    try{res=await fetch('/api/football?endpoint=fixtures&date='+encodeURIComponent(date),{signal:controller.signal})}finally{clearTimeout(timeout)}
-    const data=await res.json();
-    if(requestVersion!==apiRequestVersion||!navigator.onLine)return;
-    apiResults.replaceChildren();
-    if(!res.ok){if(res.status===429){const retry=res.headers.get('Retry-After');const seconds=/^\d+$/.test(retry||'')?Number(retry):Math.ceil((Date.parse(retry)-Date.now())/1000);apiCooldown(Number.isFinite(seconds)?seconds:60)}apiResults.append(safeText('p',res.status===429?'Had semakan sementara dicapai. Cuba lagi kemudian.':res.status===422?'Tarikh atau data tidak dibenarkan dalam pelan percuma.':'Data tidak tersedia buat masa ini.'));return}
-    if(!Array.isArray(data?.response)){apiResults.append(safeText('p','Respons API tidak sah. Tiada skor dipaparkan.'));return}
-    const matches=data.response;
-    matchCentre.acceptAPI(data,date);
-    apiResults.append(safeText('p','Tarikh pertanyaan sumber UTC '+date+' · '+matches.length+' rekod API-Football. Match Centre menapis tarikh MYT; liputan sempadan hari mungkin tidak lengkap.'));
-    if(!matches.length){apiResults.append(safeText('p','Tiada perlawanan dipulangkan oleh API. Ini tidak bermakna tiada perlawanan berlangsung.'));return}
-    apiResults.append(safeText('p','Lihat kad Match Centre di atas untuk rekod sah mengikut liga dan tarikh MYT. Medan yang tidak lengkap tidak direka.'));
-  }catch{apiResults.replaceChildren(safeText('p','Sambungan gagal atau tamat masa. Cuba lagi kemudian.'))}
-  finally{if(requestVersion===apiRequestVersion)apiCheck.disabled=!navigator.onLine||Date.now()<apiBlockedUntil}
+ if(!navigator.onLine){apiResults.replaceChildren(safeText('p','Di luar talian. Skor memerlukan sambungan internet.'));return}
+ if(Date.now()<apiBlockedUntil)return;
+ const requestVersion=++apiRequestVersion,date=apiDate.value;
+ if(!PlusMatchData.validDate(date)){apiResults.replaceChildren(safeText('p','Pilih tarikh yang sah.'));return}
+ apiResults.replaceChildren(safeText('p','Sedang menyemak data API-Football...'));
+ try{
+  const {data,at}=await footballClient.fixtures(date);
+  if(requestVersion!==apiRequestVersion||!navigator.onLine)return;
+  apiResults.replaceChildren();matchCentre.acceptAPI(data,date,at);
+  apiResults.append(safeText('p','Tarikh pertanyaan sumber UTC '+date+' · '+data.response.length+' rekod API-Football. Match Centre menapis tarikh MYT; liputan sempadan hari mungkin tidak lengkap.'));
+  if(!data.response.length)apiResults.append(safeText('p','Tiada perlawanan dipulangkan oleh API. Ini tidak bermakna tiada perlawanan berlangsung.'));
+  else apiResults.append(safeText('p','Lihat kad Match Centre di atas untuk rekod sah mengikut liga dan tarikh MYT. Medan yang tidak lengkap tidak direka.'));
+ }catch(e){if(requestVersion!==apiRequestVersion)return;apiResults.replaceChildren(safeText('p',e.code==='rate'?'Had semakan sementara dicapai. Cuba lagi kemudian.':e.code==='coverage'?'Tarikh atau data tidak dibenarkan dalam pelan percuma.':e.code==='invalid'?'Respons API tidak sah. Tiada skor dipaparkan.':'Sambungan gagal atau tamat masa. Cuba lagi kemudian.'))}
+ finally{if(requestVersion===apiRequestVersion)apiCheck.disabled=!navigator.onLine||Date.now()<apiBlockedUntil}
 });
 const sportsBase='https://www.thesportsdb.com/api/v1/json/123/';
 const sportsPending=new Map();
-let sportsEpoch=0;
+let sportsEpoch=0,sportsBlockedUntil=0;
 async function sportsGet(path){
  if(!navigator.onLine)throw Error('Offline');
  const epoch=sportsEpoch;
  const cached=sportsCache.get(path);if(cached&&Date.now()-cached.at<sportsTTL)return cached.data;
  if(sportsPending.has(path))return sportsPending.get(path);
+ if(Date.now()<sportsBlockedUntil)throw Object.assign(new Error('rate'),{code:'rate',retryAfter:Math.ceil((sportsBlockedUntil-Date.now())/1000)});
  const work=(async()=>{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),9000);
- try{const res=await fetch(sportsBase+path,{signal:controller.signal,cache:'no-store'});if(!res.ok)throw Error('API unavailable');const data=await res.json();if(!data||typeof data!=='object')throw Error('Invalid data');if(/^events(?:next|past)league\.php/.test(path)&&!(data.events===null||Array.isArray(data.events)))throw Error('Invalid event collection');if(/^searchplayers\.php/.test(path)&&!(data.player===null||Array.isArray(data.player)))throw Error('Invalid player collection');if(!navigator.onLine||epoch!==sportsEpoch)throw Error('Offline');sportsCache.set(path,{at:Date.now(),data});return data}finally{clearTimeout(timer)}})();
+ try{const res=await fetch(sportsBase+path,{signal:controller.signal,cache:'no-store'});if(!res.ok){if(res.status===429){const retry=res.headers.get('Retry-After');const seconds=/^\d+$/.test(retry||'')?Number(retry):Math.ceil((Date.parse(retry)-Date.now())/1000);const wait=Math.max(60,Math.min(86400,Number.isFinite(seconds)?seconds:60));sportsBlockedUntil=Date.now()+wait*1000;throw Object.assign(new Error('rate'),{code:'rate',retryAfter:wait})}throw Error('API unavailable')}const data=await res.json();if(!data||typeof data!=='object')throw Error('Invalid data');if(/^(?:events(?:next|past)league|eventsday)\.php/.test(path)&&!(data.events===null||Array.isArray(data.events)))throw Error('Invalid event collection');if(/^searchplayers\.php/.test(path)&&!(data.player===null||Array.isArray(data.player)))throw Error('Invalid player collection');if(!navigator.onLine||epoch!==sportsEpoch)throw Error('Offline');sportsCache.set(path,{at:Date.now(),data});return data}finally{clearTimeout(timer)}})();
  sportsPending.set(path,work);try{return await work}finally{if(sportsPending.get(path)===work)sportsPending.delete(path)}
 }
 function showLoading(box,message){const state=document.createElement('div');state.className='loading-state';state.setAttribute('role','status');state.append(safeText('p',message));for(let i=0;i<3;i++){const line=document.createElement('div');line.className='skeleton';line.setAttribute('aria-hidden','true');state.append(line)}box.replaceChildren(state);box.setAttribute('aria-busy','true')}
 function showError(box,message,retry){const state=document.createElement('div');state.className='error-state';state.setAttribute('role','alert');state.append(safeText('strong','Sambungan tergendala'),safeText('p',message));const button=safeText('button','CUBA LAGI ↗');button.type='button';button.className='pill';button.addEventListener('click',retry);state.append(button);box.replaceChildren(state);box.setAttribute('aria-busy','false')}
 let scoreRequest=0,fixtureRequest=0;
-function safeText(tag,value){const e=document.createElement(tag);e.textContent=String(value??'—');return e}function loadScores(league){return matchCentre.loadLeague(league)}
+function safeText(tag,value){const e=document.createElement(tag);e.textContent=String(value??'—');return e}function loadScores(league){
+ const international=league==='international';
+ document.getElementById('clubMatchToolbar').hidden=international;document.getElementById('clubMatchResults').hidden=international;
+ if(international){apiRequestVersion++;apiResults.replaceChildren();matchCentre.suspend();internationalCentre.show();document.querySelectorAll('[data-score]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.score===league)));return}
+ internationalCentre.hide();return matchCentre.loadLeague(league);
+}
 const matchCentre=PlusMatchCentre.create({sportsGet,sportsCache,sportsTTL});
+const internationalCentre=PlusInternationalCentre.create({footballClient,sportsGet,sportsCache});
 document.querySelectorAll('[data-score]').forEach(b=>b.addEventListener('click',()=>loadScores(b.dataset.score)));document.getElementById('playerSearch').addEventListener('click',async()=>{const q=document.getElementById('playerName').value.trim();const box=document.getElementById('playerResults');if(!q){box.replaceChildren(safeText('p','Masukkan nama pemain.'));return}box.replaceChildren(safeText('p','Sedang mencari...'));try{const d=await sportsGet('searchplayers.php?p='+encodeURIComponent(q));const players=(d.player||[]).slice(0,5);box.replaceChildren();if(!players.length){box.append(safeText('p','Tiada pemain ditemui dalam liputan percuma.'));return}players.forEach(p=>{const div=document.createElement('p');div.append(safeText('strong',p.strPlayer||'Pemain'),safeText('span',' · '+(p.strTeam||'Pasukan tidak tersedia')+' · '+(p.strPosition||'Posisi tidak tersedia')));box.append(div)})}catch(e){box.replaceChildren(safeText('p','Carian tidak tersedia sekarang.'))}});
 const fixtureInfo={epl:{name:'Premier League',id:'4328',url:'https://www.premierleague.com/en/fixtures'},ucl:{name:'UEFA Champions League',id:'4480',url:'https://www.uefa.com/uefachampionsleague/fixtures-results/'},msl:{name:'Liga Super Malaysia',id:null,url:'https://www.malaysianfootballleague.com/'}};async function showFixtures(id){const token=++fixtureRequest;const f=fixtureInfo[id];if(!f)return;document.querySelectorAll('[data-fixture]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.fixture===id)));const el=document.getElementById('fixturesContent');showLoading(el,'Sedang menyemak jadual…');const now=new Date(),day=(now.getDay()+6)%7,start=new Date(now.getFullYear(),now.getMonth(),now.getDate()-day),end=new Date(start);end.setDate(start.getDate()+7);const fmt=d=>d.toLocaleDateString('ms-MY',{day:'numeric',month:'short',year:'numeric'});const title=safeText('h3',f.name+' · '+fmt(start)+' – '+fmt(new Date(end.getTime()-86400000)));const link=document.createElement('a');link.href=f.url;link.target='_blank';link.rel='noopener noreferrer';link.className='pill';link.textContent='SEMAK SUMBER RASMI ↗';if(!f.id){el.setAttribute('aria-busy','false');el.replaceChildren(title,safeText('p','Liputan automatik Liga Super belum disahkan. Semak jadual rasmi; tiada perlawanan direka.'),link);return}try{const d=await sportsGet('eventsnextleague.php?id='+f.id);if(token!==fixtureRequest)return;el.setAttribute('aria-busy','false');const rows=(d.events||[]).filter(e=>e.dateEvent&&e.strHomeTeam&&e.strAwayTeam).filter(e=>{const date=new Date(e.dateEvent+'T12:00:00');return date>=start&&date<end});el.replaceChildren(title);if(!rows.length){el.append(safeText('p','Tiada perlawanan minggu ini dalam sampel API. Liputan percuma sangat terhad; sila semak jadual rasmi untuk senarai penuh.'))}else{const table=document.createElement('table');table.className='standings-table';rows.forEach(e=>{const tr=document.createElement('tr');tr.append(safeText('td',e.dateEvent),safeText('td',e.strHomeTeam+' vs '+e.strAwayTeam),safeText('td',e.strTime?e.strTime.slice(0,5)+' UTC':'Masa belum tersedia'));table.append(tr)});el.append(table)}el.append(link,safeText('p','Data terhad: API percuma boleh memulangkan hanya satu perlawanan. Waktu sumber UTC, tertakluk kepada perubahan.'))}catch(e){if(token===fixtureRequest){showError(el,'Jadual tidak dapat dimuatkan. Anda juga boleh menyemak sumber rasmi.',()=>showFixtures(id));el.append(link)}}}document.querySelectorAll('[data-fixture]').forEach(b=>b.addEventListener('click',()=>showFixtures(b.dataset.fixture)));
 const leagues={epl:{name:'Premier League (EPL)',url:'https://www.premierleague.com/en/tables/premier-league/2026-27/all-matchweeks',source:'Sports Mole (semakan 11 Nov 2026)',rows:[["Arsenal",10,10,27],["Brighton",10,19,22],["Manchester City",10,8,21],["Liverpool",10,4,18],["Chelsea",10,3,16],["Everton",10,2,16],["Bournemouth",10,2,15],["Brentford",10,5,14],["Leeds United",10,2,14],["Aston Villa",10,-3,13],["Tottenham",10,-1,12],["Newcastle",10,-3,12],["Hull City",10,0,11],["Ipswich Town",10,-5,11],["Fulham",10,-2,10],["Nottingham Forest",10,-4,9],["Coventry City",10,-9,9],["Manchester United",10,-5,8],["Sunderland",10,-9,8],["Crystal Palace",10,-14,7]]},ucl:{name:'UEFA Champions League (UCL)',url:'https://www.uefa.com/uefachampionsleague/standings/',source:'NBC Sports (semakan 11 Nov 2026)',rows:[["PSG",4,15,12],["Real Madrid",4,6,12],["Arsenal",4,3,10],["Como",4,13,9],["Barcelona",4,8,9],["Aston Villa",4,6,9],["Manchester City",4,5,9],["Liverpool",4,4,9],["Club Brugge",4,4,9],["Sporting CP",4,4,9],["Real Betis",4,2,9],["Borussia Dortmund",4,2,9],["Bayern Munich",4,7,8],["Stuttgart",4,3,7],["Inter Milan",4,2,6],["LASK Linz",4,1,6],["Manchester United",4,0,6],["Galatasaray",4,-1,6],["Fenerbahce",4,-5,5],["AS Roma",4,2,4],["Shakhtar Donetsk",4,0,4],["Viking",4,-1,4],["Atletico Madrid",4,-1,4],["PSV",4,-1,4],["Bodo/Glimt",4,-5,4],["Porto",4,-1,3],["Napoli",4,-5,3],["Villarreal",4,-6,3],["AEK Athens",4,-6,3],["RB Leipzig",4,-6,3],["Sabah",4,-6,3],["Feyenoord",4,-7,3],["Lens",4,-12,3],["Slavia Prague",4,-4,1],["Lille",4,-6,1],["Slovan Bratislava",4,-16,0]]},msl:{name:'Liga Super Malaysia',url:'https://www.goal.com/en-my/competition/liga-super/table/eg6s9f1jj7jr6stmbosn0g6c8',source:'Goal.com Malaysia (semakan 11 Nov 2026)',rows:[["Johor Darul Ta'zim",6,28,18],["Selangor",6,13,18],["Kuching City",6,10,12],["Brunei DPMM",6,1,12],["Sabah",6,3,10],["Melaka FC",6,-2,9],["Kuala Lumpur City",5,-7,6],["Terengganu",6,-5,5],["Star City",6,-7,5],["Penang",6,-5,4],["Negeri Sembilan",5,-6,2],["Kelantan Red Warrior",6,-23,0]]}};
@@ -89,7 +86,7 @@ function artFor(n,priority=false,context='card'){
  const cover=safeText('strong',n.cover.replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]+>/g,''));art.append(logo,cover);
  const image=n.image||(n.id===1?'https://commons.wikimedia.org/wiki/Special:FilePath/Malaysia_fans_waving_flag.jpg':'');
  if(image){const img=document.createElement('img');img.alt=n.photo?.alt||n.title;img.width=n.photo?.width||1080;img.height=n.photo?.height||1080;img.loading=priority?'eager':'lazy';img.decoding='async';if(priority)img.fetchPriority='high';
-  if(n.photo){art.classList.add('photo-art');img.srcset=n.photo.srcset;img.sizes=context==='modal'?'(min-width:730px) 660px, 100vw':'(min-width:1000px) 400px, (min-width:641px) 50vw, 100vw';img.style.objectFit=n.photo.fit;img.style.objectPosition=n.photo.position;}
+  if(n.photo){art.classList.add('photo-art');if(n.photo.srcset)img.srcset=n.photo.srcset;img.sizes=context==='modal'?'(min-width:730px) 660px, 100vw':'(min-width:1000px) 400px, (min-width:641px) 50vw, 100vw';img.style.objectFit=n.photo.fit;img.style.objectPosition=n.photo.position;}
   img.onload=()=>{logo.hidden=true;cover.hidden=true;art.classList.remove('image-failed')};
   img.onerror=()=>{img.remove();logo.hidden=false;cover.hidden=false;art.classList.add('image-failed')};
   if(n.id===1)art.classList.add('has-photo');img.src=image;art.append(img)}
@@ -98,9 +95,10 @@ function artFor(n,priority=false,context='card'){
 function photoCredit(n){
  const credit=document.createElement('figcaption');credit.className='photo-credit';
  credit.append(safeText('span',n.photo.caption+' '));
- const source=safeText('a',n.photo.author+' / Wikimedia Commons');source.href=n.photo.sourceUrl;source.target='_blank';source.rel='noopener noreferrer';
+ if(!n.photo.author||!n.photo.sourceUrl||!n.photo.licenseUrl)return credit;
+ const source=safeText('a',n.photo.author+(/^https:\/\/commons\.wikimedia\.org\//.test(n.photo.sourceUrl)?' / Wikimedia Commons':''));source.href=n.photo.sourceUrl;source.target='_blank';source.rel='noopener noreferrer';
  const license=safeText('a',n.photo.license);license.href=n.photo.licenseUrl;license.target='_blank';license.rel='noopener noreferrer';
- credit.append(source,document.createTextNode(' · '),license,document.createTextNode(' · WebP/saiz diubah; bingkai paparan mungkin dipotong.'));
+ credit.append(source,document.createTextNode(' · '),license,document.createTextNode(n.image.endsWith('.webp')?' · WebP/saiz diubah; bingkai paparan mungkin dipotong.':' · Bingkai paparan mungkin dipotong.'));
  return credit;
 }
 function storyFor(n,featured=false){
@@ -172,7 +170,7 @@ $('year').textContent=new Date().getFullYear();renderLead();renderFilters();rend
 // Match data is never presented from the service-worker offline cache. Also
 // invalidate the page's short-lived memory cache and in-flight render tokens.
 function footballDisconnected(){
- sportsEpoch++;sportsCache.clear();sportsPending.clear();scoreRequest++;fixtureRequest++;apiRequestVersion++;matchCentre.invalidate('Di luar talian. Data perlawanan memerlukan internet.');
+ footballClient.invalidate();sportsEpoch++;sportsCache.clear();sportsPending.clear();scoreRequest++;fixtureRequest++;apiRequestVersion++;matchCentre.invalidate('Di luar talian. Data perlawanan memerlukan internet.');
  apiCheck.disabled=true;
  for(const id of ['scoreContent','fixturesContent','playerResults']){
   const box=$(id);box.replaceChildren(safeText('p','Di luar talian. Data perlawanan dan carian pemain memerlukan internet.'));

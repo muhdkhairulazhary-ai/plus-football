@@ -157,6 +157,12 @@ button, a, summary { -webkit-tap-highlight-color: #ef304630; }
 .notice { border-radius: 12px; }
 .footer { border-top-color: #ffffff18; color: #b7b7c2; }
 .skeleton { border-radius: 14px; }
+.international-controls { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; margin: 20px 0; align-items: end; }
+.international-controls label { display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #c7c7d0; min-width: 0; }
+.international-controls input, .international-controls select { width: 100%; min-width: 0; min-height: 48px; border: 1px solid #ffffff38; border-radius: 14px; padding: 11px; font-size: 16px; color: #fff; background: #15151a; color-scheme: dark; }
+.international-flag { width: 32px; text-align: center; font-size: 26px; }
+.international-competition { padding: 10px 16px 0; margin: 0; font-size: 11px; color: #c7c7d0; }
+#internationalResults > strong { display: block; margin-top: 20px; }
 /* Progressive glass on selected panels, never each card in the news list.
    Ambient lights are siblings behind the panels, not tinted panel overlays. */
 @supports ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
@@ -217,6 +223,9 @@ button, a, summary { -webkit-tap-highlight-color: #ef304630; }
   .standings-panel, .mc-shell { padding: 15px; }
   .standings-tabs button { padding-inline: 15px; }
   .mc-leagues button { padding-inline: 8px; }
+  .mc-leagues { flex-wrap: wrap; }
+  .mc-leagues button { flex: 1 0 calc(50% - 7px); }
+  .international-controls { grid-template-columns: minmax(0,1fr); }
   .mc-date-row button { padding-inline: 10px; }
   .mc-date-row input { padding-inline: 5px; }
   .mc-heading .section-title { font-size: 33px; }

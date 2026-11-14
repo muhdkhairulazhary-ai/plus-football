@@ -114,8 +114,9 @@
 <div class="mc-heading"><div><span class="eyebrow">PLUS+ FOOTBALL · MATCHDAY</span><h2 class="section-title">MATCH <span>CENTRE</span></h2></div><span class="mc-coverage">DATA TERHAD</span></div>
 <p class="panel-intro">Perlawanan pilihan anda, dalam waktu Malaysia. Sampel percuma mungkin lewat atau tidak lengkap; bukan feed langsung masa nyata.</p>
 <div class="mc-shell">
-<div class="mc-toolbar"><div class="mc-date-control"><label for="matchDate">Tarikh perlawanan · MYT</label><div class="mc-date-row"><button type="button" id="matchPrev" aria-label="Hari sebelumnya">←</button><input type="date" id="matchDate"><button type="button" id="matchNext" aria-label="Hari berikutnya">→</button><button type="button" id="matchToday">HARI INI</button></div></div><div class="mc-source-control"><label for="matchSource">Sumber data</label><select id="matchSource"><option value="sports">TheSportsDB · sampel percuma</option><option value="api">API-Football · semakan manual</option></select></div></div>
-<div class="mc-leagues standings-tabs" role="group" aria-label="Liga untuk skor"><button type="button" aria-pressed="false" data-score="4328">EPL</button><button type="button" aria-pressed="false" data-score="4480">UCL</button><button type="button" aria-pressed="false" data-score="4792">LIGA SUPER</button></div>
+<div class="mc-toolbar" id="clubMatchToolbar"><div class="mc-date-control"><label for="matchDate">Tarikh perlawanan · MYT</label><div class="mc-date-row"><button type="button" id="matchPrev" aria-label="Hari sebelumnya">←</button><input type="date" id="matchDate"><button type="button" id="matchNext" aria-label="Hari berikutnya">→</button><button type="button" id="matchToday">HARI INI</button></div></div><div class="mc-source-control"><label for="matchSource">Sumber data</label><select id="matchSource"><option value="sports">TheSportsDB · sampel percuma</option><option value="api">API-Football · semakan manual</option></select></div></div>
+<div class="mc-leagues standings-tabs" role="group" aria-label="Liga untuk skor"><button type="button" aria-pressed="false" data-score="4328">EPL</button><button type="button" aria-pressed="false" data-score="4480">UCL</button><button type="button" aria-pressed="false" data-score="4792">LIGA SUPER</button><button type="button" aria-pressed="false" data-score="international">ANTARABANGSA</button></div>
+<div id="clubMatchResults">
 <div class="mc-result-bar"><p id="matchSummary" role="status" aria-live="polite">Pilih liga untuk menyemak sampel perlawanan.</p><button type="button" id="matchRefresh" class="mc-refresh">SEMAK SEMULA ↻</button></div>
 <div id="scoreContent" class="standings-content" aria-live="polite">Data dimuatkan apabila Match Centre dibuka.</div>
 <p class="standings-note">Tarikh menapis sampel TheSportsDB yang sudah dimuatkan, tanpa panggilan API tambahan. Tiada rekod tidak bermaksud tiada perlawanan. Kedudukan liga kekal dalam panel Standings.</p>
@@ -133,6 +134,26 @@
 </div>
 </details>
 <p class="standings-note">Sumber TheSportsDB (API percuma). Keputusan mungkin lewat; setiap permintaan liga hanya mengembalikan sebahagian kecil perlawanan. Bukan skor langsung masa nyata.</p>
+</div>
+<section id="internationalPanel" hidden aria-labelledby="internationalTitle">
+<h3 id="internationalTitle">ANTARABANGSA · PASUKAN KEBANGSAAN</h3>
+<p class="standings-note">Persahabatan, kelayakan Piala Dunia / benua dan kejohanan yang dapat dikenal pasti dalam sampel pembekal. Semua negara yang dipulangkan boleh dicari; liputan percuma bukan senarai penuh. Skor mungkin lewat.</p>
+<div class="international-controls">
+<label>Sumber<select id="internationalSource"><option value="api">API-Football · manual</option><option value="sports">TheSportsDB · sampel percuma</option></select></label>
+<label>Tarikh pertanyaan pembekal · UTC<input type="date" id="internationalQueryDate"></label>
+<button type="button" class="pill" id="internationalLoad">MUAT SAMPEL TARIKH</button>
+</div>
+<p class="standings-note">Setiap muatan boleh menggunakan kuota. Tiada muatan automatik atau permintaan untuk setiap negara. Sampel API-Football dikongsi dengan semakan liga; had antara cubaan sekurang-kurangnya 60 saat.</p>
+<div class="international-controls">
+<label>Tarikh paparan · MYT<input type="date" id="internationalDate"></label>
+<label>Cari negara / pasukan<input type="search" id="internationalSearch" placeholder="Malaysia, Japan, Brazil…" maxlength="100"></label>
+<label>Jenis pertandingan<select id="internationalKind"><option value="all">Semua jenis</option><option value="friendlies">Persahabatan</option><option value="qualifiers">Kelayakan</option><option value="tournaments">Kejohanan</option></select></label>
+<label>Pertandingan dalam sampel<select id="internationalCompetition"><option value="all">Semua pertandingan tersedia</option></select></label>
+</div>
+<p id="internationalCoverage" class="standings-note">Penapis hanya menapis sampel yang dimuatkan, tanpa panggilan baharu. Tarikh UTC dan MYT boleh berbeza; tiada pertanyaan hari tambahan dibuat secara automatik.</p>
+<div id="internationalResults" class="standings-content" aria-live="polite"></div>
+<a href="https://www.fifa.com/" class="mc-official" target="_blank" rel="noopener noreferrer">SEMAK SUMBER RASMI FIFA ↗</a>
+</section>
 </div>
 </section>
 <section id="perlawanan" class="page-panel">
@@ -213,6 +234,9 @@
 </div>
 <script src="match-data.js" defer></script>
 <script src="match-centre.js" defer></script>
+<script src="football-client.js" defer></script>
+<script src="international-data.js" defer></script>
+<script src="international-centre.js" defer></script>
 <script src="app.js" defer>
 </script>
 <script src="pwa.js" defer></script>

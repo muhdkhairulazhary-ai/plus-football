@@ -94,7 +94,7 @@ class PwaBrowser(unittest.IsolatedAsyncioTestCase):
  async def test_saved_news_offline_and_uncached_route_fallback(self):
   await self.context.set_offline(True);await self.page.reload()
   await self.page.locator('#connectionNotice').wait_for(state='visible')
-  self.assertEqual(await self.page.locator('#articles .story').count(),11)
+  self.assertEqual(await self.page.locator('#articles .story').count(),12)
   self.assertIn('luar talian',await self.page.locator('#connectionMessage').inner_text())
   await self.page.locator('#articles [data-id="14"]').click()
   self.assertIn('Dion Cools',await self.page.locator('#modalTitle').inner_text())

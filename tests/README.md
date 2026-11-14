@@ -68,3 +68,12 @@ interior panel pixels with the decorative ambient layer visible versus hidden
 at 375/390/430px. Evidence PNGs and `ambient-pixel-evidence.json` are written to
 `/tmp/plus-football-liquid-glass/`. Requires preinstalled Pillow for pixel analysis.
 No production screenshot or real API request is used.
+
+International Match Centre scope, provider limits and remaining quota security
+limitations: `docs/INTERNATIONAL-MATCH-CENTRE.md`. Preservation baselines now use
+latest main `f1ef6c8`, including article 17 and the uploaded JPEG.
+
+```sh
+node --test --test-isolation=none tests/international.test.mjs
+PYTHONDONTWRITEBYTECODE=1 python tests/international_browser.py
+```

@@ -104,7 +104,7 @@
   window.addEventListener('offline',()=>{apiDays.clear();invalidate('Di luar talian. Tiada skor tersimpan dipaparkan.')});
   window.addEventListener('pageshow',()=>{if(receivedAt&&Date.now()-receivedAt>=sportsTTL)invalidate()});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&receivedAt&&Date.now()-receivedAt>=sportsTTL)invalidate()});
-  return Object.freeze({loadLeague,acceptAPI,invalidate,selectDate});
+  return Object.freeze({loadLeague,acceptAPI,invalidate,selectDate,suspend(){token++;clearTimeout(expiry)}});
  }
  globalThis.PlusMatchCentre=Object.freeze({create});
 })();

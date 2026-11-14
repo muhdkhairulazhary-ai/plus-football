@@ -33,11 +33,11 @@ test('iOS installation metadata and safe viewport are present',()=>{
  for(const text of ['viewport-fit=cover','apple-mobile-web-app-capable','apple-mobile-web-app-status-bar-style','apple-touch-icon','180x180','Add to Home Screen','installGuide'])assert(html.includes(text),text);
 });
 test('all pre-PWA article data, photos and API implementation are preserved',async()=>{
- const js=await readFile(new URL('app.js',root),'utf8');const baseline=execFileSync('git',['show','679a35e:app.js'],{encoding:'utf8'});
+ const js=await readFile(new URL('app.js',root),'utf8');const baseline=execFileSync('git',['show','f1ef6c8:app.js'],{encoding:'utf8'});
  const news=s=>s.slice(s.indexOf('const news='),s.indexOf('const sportsCache'));
  assert.equal(news(js),news(baseline));
- for(const path of execFileSync('git',['ls-tree','-r','--name-only','679a35e','--','images','functions','icon.svg'],{encoding:'utf8'}).trim().split('\n'))
-  assert.deepEqual(await readFile(new URL(path,root)),execFileSync('git',['show','679a35e:'+path]),path);
+ for(const path of execFileSync('git',['ls-tree','-r','--name-only','f1ef6c8','--','images','functions','icon.svg'],{encoding:'utf8'}).trim().split('\n'))
+  assert.deepEqual(await readFile(new URL(path,root)),execFileSync('git',['show','f1ef6c8:'+path]),path);
 });
 test('cache revision is current, deterministic and limited to local public static files',async()=>{
  execFileSync(process.execPath,['scripts/update-pwa-cache.mjs','--check'],{cwd:new URL('../',import.meta.url)});

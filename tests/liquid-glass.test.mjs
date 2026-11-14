@@ -5,10 +5,10 @@ import {execFileSync} from 'node:child_process';
 const root=new URL('../',import.meta.url);
 const read=p=>readFileSync(new URL(p,root),'utf8');
 test('Liquid Glass preserves content, API, PWA logic, metadata and source adapters',()=>{
- for(const path of ['app.js','match-data.js','match-centre.js','pwa.js','manifest.webmanifest','functions/api/football.js']){
-  assert.equal(read(path),execFileSync('git',['show','7d045aa:'+path],{cwd:root,encoding:'utf8'}),path);
+ for(const path of ['match-data.js','pwa.js','manifest.webmanifest','functions/api/football.js']){
+  assert.equal(read(path),execFileSync('git',['show','f1ef6c8:'+path],{cwd:root,encoding:'utf8'}),path);
  }
- const before=execFileSync('git',['show','7d045aa:index.html'],{cwd:root,encoding:'utf8'});
+ const before=execFileSync('git',['show','f1ef6c8:index.html'],{cwd:root,encoding:'utf8'});
  const metadata=html=>html.match(/<(?:meta|title|link)[^>]*(?:>[^<]*<\/title>)?/g).filter(line=>!line.includes('stylesheet'));
  assert.deepEqual(metadata(read('index.html')),metadata(before));
 });

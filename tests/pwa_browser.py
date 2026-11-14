@@ -62,7 +62,7 @@ class PwaBrowser(unittest.IsolatedAsyncioTestCase):
   session=await self.context.new_cdp_session(self.page)
   manifest=await session.send('Page.getAppManifest')
   self.assertEqual(manifest['errors'],[])
-  self.assertTrue(manifest['url'].endswith('/manifest.webmanifest'))
+  self.assertEqual(urlparse(manifest['url']).path,'/manifest.webmanifest')
   await self.page.add_init_script("Object.defineProperty(navigator,'standalone',{get:()=>true})")
   await self.page.reload()
   await self.page.locator('#installButton').click()
@@ -72,6 +72,23 @@ class PwaBrowser(unittest.IsolatedAsyncioTestCase):
   await self.page.evaluate("for(const value of sportsCache.values())value.at=Date.now()-121000;window.dispatchEvent(new Event('pageshow'))")
   self.assertEqual(await self.page.locator('.score-centre b').count(),0)
   self.assertIn('telah luput',await self.page.locator('#scoreContent').inner_text())
+ async def test_versioned_icon_urls_decode_with_brand_colors(self):
+  icons=await self.page.evaluate("""async()=>{
+   const manifest=await fetch(document.querySelector('link[rel=manifest]').href).then(r=>r.json());
+   const urls=[document.querySelector('link[rel=apple-touch-icon]').href,...manifest.icons.map(i=>new URL(i.src,location.href).href)];
+   return await Promise.all(urls.map(async url=>{
+    const image=new Image();image.src=url;await image.decode();
+    const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+    const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+    let white=0,red=0,transparent=0;for(let i=0;i<pixels.length;i+=4){if(pixels[i]>230&&pixels[i+1]>230&&pixels[i+2]>230)white++;if(pixels[i]>180&&pixels[i+1]<90&&pixels[i+2]<100)red++;if(pixels[i+3]!==255)transparent++;}
+    return {url,width:canvas.width,height:canvas.height,white,red,transparent,corner:[...pixels.slice(0,4)]};
+   }));
+  }""")
+  for icon,size in zip(icons,[180,192,512]):
+   self.assertEqual((icon['width'],icon['height']),(size,size))
+   self.assertEqual(icon['corner'],[11,11,11,255]);self.assertEqual(icon['transparent'],0)
+   self.assertGreater(icon['white'],100);self.assertGreater(icon['red'],20)
+   self.assertIn('v2.png',icon['url'])
  async def test_saved_news_offline_and_uncached_route_fallback(self):
   await self.context.set_offline(True);await self.page.reload()
   await self.page.locator('#connectionNotice').wait_for(state='visible')

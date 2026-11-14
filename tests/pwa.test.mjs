@@ -12,11 +12,22 @@ test('manifest has exact PWA identity, standalone scope and colors',()=>{
  assert.equal(manifest.theme_color,'#0b0b0b');assert.equal(manifest.background_color,'#0b0b0b');
 });
 test('branded PNG icons have valid signatures and exact dimensions',async()=>{
- for(const [path,size] of [['icons/icon-192.png',192],['icons/icon-512.png',512],['icons/apple-touch-icon.png',180]]){
+ for(const [path,size] of [['icons/icon-192.png',192],['icons/icon-512.png',512],['icons/apple-touch-icon.png',180],['icons/plus-football-192-v2.png',192],['icons/plus-football-512-v2.png',512],['icons/apple-touch-icon-plus-football-v2.png',180]]){
   const b=await readFile(new URL(path,root));assert.equal(b.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
   assert.equal(b.readUInt32BE(16),size);assert.equal(b.readUInt32BE(20),size);
  }
  for(const size of [192,512])assert(manifest.icons.some(icon=>icon.sizes===size+'x'+size&&icon.type==='image/png'));
+});
+test('Safari and manifest reference versioned wordmark icons; old URLs stay compatible',async()=>{
+ assert.equal((html.match(/rel="apple-touch-icon"/g)||[]).length,1);
+ assert(html.includes('href="/icons/apple-touch-icon-plus-football-v2.png"'));
+ assert(html.includes('manifest.webmanifest?v=plus-football-brand-2'));
+ for(const [path,alias] of [['apple-touch-icon-plus-football-v2.png','apple-touch-icon.png'],['plus-football-192-v2.png','icon-192.png'],['plus-football-512-v2.png','icon-512.png']]){
+  assert.deepEqual(await readFile(new URL('icons/'+path,root)),await readFile(new URL('icons/'+alias,root)));
+ }
+ assert.deepEqual(manifest.icons.map(icon=>icon.src),['/icons/plus-football-192-v2.png','/icons/plus-football-512-v2.png']);
+ const brand=await readFile(new URL('icons/plus-football-brand.svg',root),'utf8');
+ assert(brand.includes('font-style="italic"'));assert(brand.includes('>plus</text>'));assert(brand.includes('>+</text>'));assert(brand.includes('>FOOTBALL</text>'));
 });
 test('iOS installation metadata and safe viewport are present',()=>{
  for(const text of ['viewport-fit=cover','apple-mobile-web-app-capable','apple-mobile-web-app-status-bar-style','apple-touch-icon','180x180','Add to Home Screen','installGuide'])assert(html.includes(text),text);

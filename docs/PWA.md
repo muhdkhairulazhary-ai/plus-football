@@ -8,8 +8,9 @@ or API secret is added or changed. All interface copy remains Bahasa Melayu.
 
 Manifest: `manifest.webmanifest`; name `plus+ Football`, short name `plus+`,
 standalone, root start URL/scope, background and theme `#0b0b0b`.
-PNG icons 192/512 and Apple Touch Icon 180 are rasterizations of the existing
-`icon.svg` branding, with opaque dark backgrounds. No AI image generation.
+PNG icons 192/512 and Apple Touch Icon 180 use the existing `icon.svg`
+branding, with opaque `#0b0b0b` backgrounds. Reproducible raster source:
+`icons/plus-football-brand.svg`; generator: `python scripts/generate-pwa-icons.py`. No AI image generation.
 Icons declare `any`, not maskable, because the existing wordmark does not
 claim Android's maskable safe zone. The existing SVG remains unchanged.
 
@@ -90,3 +91,22 @@ Before production review, use Safari on an iPhone to install the preview,
 check portrait/landscape/safe areas, go offline after the initial cache settles,
 read a saved article, verify scores disappear, reconnect and accept an update.
 Review only; this document does not authorize a merge or deployment.
+
+## Branded icon refresh (v2)
+
+Safari explicitly references `/icons/apple-touch-icon-plus-football-v2.png`.
+The manifest uses `/icons/plus-football-192-v2.png` and
+`/icons/plus-football-512-v2.png`. A new filename is used rather than relying
+only on query parameters, since iOS can retain Home Screen icon artwork.
+The manifest link also has a brand revision query. Original icon URLs remain
+valid compatibility aliases containing the same new artwork. The generated
+service-worker revision changes with all icons and metadata.
+
+The wordmark is white italic **plus**, a red **+**, and small white **FOOTBALL**
+on an opaque black square. System icon rounding is left to iOS. No AI or remote
+font/image is used. PNG dimensions, opacity and brand colors are browser-tested.
+
+A website cannot force iOS to replace an icon already stored by SpringBoard.
+After this branch is reviewed and available on a preview URL, remove the old
+Home Screen shortcut and add that preview again from Safari to verify the new
+icon. This does not change or deploy the production site.

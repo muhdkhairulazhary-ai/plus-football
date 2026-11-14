@@ -2,11 +2,11 @@
  * Run `node scripts/update-pwa-cache.mjs` after changing cached content.
  * Football APIs and every cross-origin request are ALWAYS network-only.
  */
-const VERSION = 'pwa-v1-595cbc46178e1564';
+const VERSION = 'pwa-v1-325e3079be6b4f91';
 const CACHE_PREFIX = 'plus-football-static-';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
 const NETWORK_TIMEOUT_MS = 4000;
-const ASSETS = ["/","/index.html","/styles.css","/app.js","/pwa.js","/offline.html","/manifest.webmanifest","/icon.svg","/images/carrick-exit.svg","/images/dion-cools-malaysia-2022-480.webp","/images/dion-cools-malaysia-2022.webp","/images/liverpool-penalty.svg","/images/nations-league.svg","/images/ribut-charles.svg","/images/roberto-de-zerbi-2021-480.webp","/images/roberto-de-zerbi-2021.webp","/images/uefa-champions-league-trophy-2009-480.webp","/images/uefa-champions-league-trophy-2009.webp","/icons/apple-touch-icon.png","/icons/icon-192.png","/icons/icon-512.png"];
+const ASSETS = ["/","/index.html","/styles.css","/app.js","/pwa.js","/offline.html","/manifest.webmanifest","/icon.svg","/images/carrick-exit.svg","/images/dion-cools-malaysia-2022-480.webp","/images/dion-cools-malaysia-2022.webp","/images/liverpool-penalty.svg","/images/nations-league.svg","/images/ribut-charles.svg","/images/roberto-de-zerbi-2021-480.webp","/images/roberto-de-zerbi-2021.webp","/images/uefa-champions-league-trophy-2009-480.webp","/images/uefa-champions-league-trophy-2009.webp","/icons/apple-touch-icon-plus-football-v2.png","/icons/apple-touch-icon.png","/icons/icon-192.png","/icons/icon-512.png","/icons/plus-football-192-v2.png","/icons/plus-football-512-v2.png","/icons/plus-football-brand.svg"];
 const STATIC_PATHS = new Set(ASSETS);
 
 self.addEventListener('install', event => {

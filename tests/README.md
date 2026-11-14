@@ -50,3 +50,21 @@ The shared browser suites now cover provider-status groups, MYT date selection,
 conditional details/stats/timeline, partial responses, validated collection
 retry, explicit API-Football opt-in/cooldown, unsupported MSL coverage and PWA
 offline/freshness behavior. All match/fixture/logo responses remain mocks.
+
+Liquid Glass presentation and preview instructions: `docs/LIQUID-GLASS.md`.
+
+```sh
+node --test --test-isolation=none tests/liquid-glass.test.mjs
+PYTHONDONTWRITEBYTECODE=1 python tests/liquid_glass_browser.py
+```
+
+These additional checks cover preservation against main `7d045aa`, mobile dock
+anchoring/hit targets at 375/390/430px, article overlays, desktop menus, reduced
+motion, increased contrast and opaque fallback. Screenshots are in
+`/tmp/plus-football-liquid-glass/`. WebKit and physical Safari are untested.
+
+Ambient rendering regression: `liquid_glass_browser.py` also compares rendered
+interior panel pixels with the decorative ambient layer visible versus hidden
+at 375/390/430px. Evidence PNGs and `ambient-pixel-evidence.json` are written to
+`/tmp/plus-football-liquid-glass/`. Requires preinstalled Pillow for pixel analysis.
+No production screenshot or real API request is used.

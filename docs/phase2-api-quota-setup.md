@@ -89,6 +89,9 @@ migrasi atau deployment telah diaktifkan oleh perubahan ini.
    API sebenar, reset window, penggunaan luar sistem dan tetapan GitHub Pages
    preview autobuild. Jangan push dengan andaian preview tidak akan deploy.
 2. Worker template: `workers/football-quota/wrangler.example.toml`.
+   Konfigurasi deployment Worker preview yang disediakan secara lokal ialah
+   `workers/football-quota/wrangler.toml`; bajet 0, tiada secret dan tiada route
+   awam. Kewujudan fail ini tidak bermaksud deployment telah dilakukan.
    `new_sqlite_classes = ["FootballQuota"]` diperlukan untuk namespace SQLite
    baharu. Nama Worker boleh ditetapkan sebelum penciptaan pertama sahaja;
    namespace/nama singleton tidak boleh diubah sewenang-wenangnya selepas live.
@@ -100,6 +103,8 @@ migrasi atau deployment telah diaktifkan oleh perubahan ini.
    dalam Worker berasingan melalui dashboard persekitaran yang betul. Template
    `docs/cloudflare-pages.phase2.example.toml` menunjukkan binding preview
    sahaja; produksi tidak mempunyai binding dalam contoh ini.
+   Projek Pages sasaran ialah `plusfootball`, bukan `plus-football`. Fail Pages
+   kekal template dan tidak diaktifkan oleh konfigurasi Worker berasingan.
 5. Template Pages mengandaikan output `public/` yang BELUM dicipta. Sahkan
    output sedia ada dan sediakan allowlist aset sahaja: index.html, images/,
    icon.svg dan manifest.webmanifest. Jangan hidangkan workers/, tests/, docs/

@@ -1,0 +1,19 @@
+# Preview Worker only. Deployment requires separate owner approval.
+# No provider secret, public route or Pages production configuration.
+name = "plus-football-quota-preview"
+main = "src/index.mjs"
+compatibility_date = "2026-11-13"
+workers_dev = false
+preview_urls = false
+
+[vars]
+# Disabled: requests fail closed before any provider call.
+API_FOOTBALL_DAILY_BUDGET = "0"
+
+[[durable_objects.bindings]]
+name = "FOOTBALL_QUOTA"
+class_name = "FootballQuota"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["FootballQuota"]

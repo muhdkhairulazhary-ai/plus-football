@@ -1,5 +1,5 @@
-/* plus+ Liquid Glass. Opaque readable baseline; progressive blur on chrome only.
-   No scroll handlers, animated filters, remote fonts or per-card backdrop layers. */
+/* plus+ Liquid Glass. Readable fallback; bounded ambient lights and glass.
+   No scroll handlers, animated filters, remote fonts or long-list card blur. */
 :root {
   --bg: #101013;
   --panel: #202024;
@@ -23,6 +23,28 @@ body {
     linear-gradient(165deg, #1d1d22 0, #141417 35%, #101013 75%, #0d0d10 100%);
   min-height: 100vh;
   -webkit-text-size-adjust: 100%;
+}
+/* Local, document-scrolling light stage. Isolation keeps its negative-z child
+   above the body background, behind content, without containing the fixed dock.
+   Clip ONLY the decorative layer, never main, menus or focus outlines. */
+#main { position: relative; isolation: isolate; background: transparent; }
+.ambient-lights {
+  position: absolute; inset: 0; z-index: -1; overflow: hidden;
+  pointer-events: none;
+}
+.ambient-lights::before, .ambient-lights::after {
+  content: ""; position: absolute; left: 2%; width: 96%; height: 1000px;
+  filter: blur(28px); border-radius: 35%;
+}
+.ambient-lights::before {
+  top: 0;
+  background: radial-gradient(ellipse 85% 44% at 85% 30%, #b52b45, #891e356b 50%, transparent 80%),
+    radial-gradient(ellipse 85% 42% at 5% 78%, #79243a9c, transparent 80%);
+}
+.ambient-lights::after {
+  top: 1250px;
+  background: radial-gradient(ellipse 90% 48% at 10% 35%, #9a263fb3, transparent 82%),
+    radial-gradient(ellipse 70% 42% at 90% 82%, #75233780, transparent 80%);
 }
 button, a, summary, input, select { touch-action: manipulation; }
 button, input, select { font-family: inherit; }
@@ -135,8 +157,14 @@ button, a, summary { -webkit-tap-highlight-color: #ef304630; }
 .notice { border-radius: 12px; }
 .footer { border-top-color: #ffffff18; color: #b7b7c2; }
 .skeleton { border-radius: 14px; }
-/* Only bounded, stationary chrome gets a backdrop surface. Cards never blur. */
+/* Progressive glass on selected panels, never each card in the news list.
+   Ambient lights are siblings behind the panels, not tinted panel overlays. */
 @supports ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
+  :root { --glass-surface: linear-gradient(145deg, #ffffff10, #ffffff02 48%, #ffffff05), #15151a66; }
+  .featured-story, .briefs, .standings-panel {
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .mc-card { background: linear-gradient(140deg,#ffffff0c,#ffffff02), #1b1b2066; }
   .top { background: #151519db; -webkit-backdrop-filter: blur(18px) saturate(120%); backdrop-filter: blur(18px) saturate(120%); }
   .quick-menu { background: #242429ed; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
 }
@@ -199,7 +227,7 @@ button, a, summary { -webkit-tap-highlight-color: #ef304630; }
   .modal .close { margin-right: 0; }
   .footer { padding-bottom: 28px; }
   @supports ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
-    .primary-nav { background: linear-gradient(165deg,#ffffff16,#ffffff03 45%,#ffffff08), #252529c9; -webkit-backdrop-filter: blur(18px) saturate(120%); backdrop-filter: blur(18px) saturate(120%); }
+    .primary-nav { background: linear-gradient(165deg,#ffffff20,#ffffff03 45%,#ffffff0b), #20202599; -webkit-backdrop-filter: blur(18px) saturate(120%); backdrop-filter: blur(18px) saturate(120%); }
   }
 }
 @media (prefers-contrast: more) {
@@ -207,6 +235,8 @@ button, a, summary { -webkit-tap-highlight-color: #ef304630; }
   .top, .primary-nav, .quick-menu { background: #121215; -webkit-backdrop-filter: none; backdrop-filter: none; }
   .story, .featured-story, .standings-panel, .mc-shell, .modal-inner { border-color: #ffffff80; }
   .mc-card { background: #202024; border-color: #ffffff80; }
+  .featured-story, .briefs, .standings-panel { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .ambient-lights { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

@@ -14,8 +14,8 @@ the links' text names and current-page semantics. The same navigation remains
 in the desktop header. No duplicate controls or navigation JavaScript.
 
 Readable dark surfaces, fine borders, highlights and red selection indicators
-provide depth without depending on blur. Only bounded chrome uses backdrop
-filters; scrolling cards/dialogs do not blur. No scroll listeners, animated
+provide depth with a readable fallback. Bounded chrome and selected feature/standings
+panels use backdrop filters; repeated news cards and dialogs do not blur. No scroll listeners, animated
 filters, fixed background layers, new fonts or dependencies. The sticky mobile
 header deliberately has no backdrop filter: a filtered ancestor would contain
 the fixed dock in Safari/Chromium. Dock uses safe-area insets and body clearance;
@@ -32,13 +32,40 @@ only the deterministic cache version and asset list change to include the new
 stylesheet. Existing explicit update activation/offline behavior is retained.
 No Worker, credentials or Cloudflare settings are changed.
 
-Atmosphere refinement: the page now uses a midnight charcoal gradient with broad,
-static burgundy/red radial falloffs behind the content. These create soft light
-without filter blur, fixed overlays or animation. Cards use translucent dark
-fills with fine highlights and shadows; text/photos/scores retain full opacity
-and no filters. The dock has a reflective gradient, a restrained red selection
-and a translucent supported-browser fill; its opaque baseline remains readable
-without backdrop-filter. Increased contrast restores opaque card surfaces.
+## Ambient rendering audit and correction
+
+The previous computed styles (Chromium, 390px) showed transparent `main` and
+page-panel ancestors with visible overflow: no opaque ancestor was masking the
+light. The strongest body radial light was only 31% opaque at its centre, while
+panels were 72% opaque plus white highlights. Even before radial falloff, only
+about 9% of that source could pass through. Panels had no backdrop filter; the
+visual result was predominantly grey. This is verified CSS attenuation, not a
+claimed Safari engine bug. WebKit/Safari execution remains unavailable here.
+
+An aria-hidden `.ambient-lights` child is now positioned absolutely inside `main`.
+`main` is transparent and isolated; the decorative child has negative z-index
+inside that isolation, so it stays above the page background and below content.
+Only this decorative wrapper clips overflow. Its two static 1000px light layers
+use burgundy/red radial sources and 28px filter blur. They scroll with the
+content, with no fixed full-screen layer, animation or scroll handler.
+
+Supported browsers get a 40%-opaque neutral panel fill; selected feature/brief/
+standings panels use both prefixed/unprefixed 8px backdrop blur. Repeated list
+cards do not create backdrop layers, and nested match cards do not add blur.
+The translucent dock retains 18px blur and a fine reflective highlight. Its
+mobile header ancestor remains unfiltered, preserving fixed positioning.
+Photos/text/scores retain full opacity and no filter; the light is behind the
+panels, not an overlay or red panel tint. Unsupported browsers retain the 72%
+readable baseline. Increased contrast disables ambient lights and restores
+opaque surfaces and no backdrop blur.
+
+Screenshots and a rendered pixel comparison at 375/390/430px verify the light
+passes through a central interior crop of the standings panel, excluding edges.
+With the ambient layer hidden but all card styling unchanged, average red-channel
+values drop by 14.5–15.0 (0–255), versus only 1.5–1.6 in green. This demonstrates
+actual transmitted burgundy light rather than a coloured border or card tint.
+Evidence: `/tmp/plus-football-liquid-glass/ambient-pixel-evidence.json`,
+`ambient-{width}.png`, `ambient-card-{width}.png` and the disabled-light controls.
 
 ## Tests
 
@@ -53,7 +80,8 @@ node scripts/update-pwa-cache.mjs --check
 Existing tests retain mock-only football data. New checks cover 375/390/430px
 dock viewport anchoring after scrolling, target dimensions/hit testing, navigation,
 article dialog/inert background, overflow, opaque fallback, increased contrast,
-reduced motion and desktop menu. Screenshots:
+reduced motion, desktop menu and the ambient interior pixel comparison (using
+preinstalled Pillow). Screenshots:
 `/tmp/plus-football-liquid-glass/`. Test fixtures are never production content.
 
 Environment: preinstalled Chromium and Python Playwright. WebKit binary is not

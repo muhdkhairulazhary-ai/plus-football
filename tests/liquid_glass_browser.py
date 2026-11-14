@@ -2,6 +2,8 @@
 Chromium emulation is not physical iPhone Safari verification.
 """
 import unittest
+import io,json
+from PIL import Image,ImageStat
 import sys
 sys.dont_write_bytecode=True
 from pathlib import Path
@@ -12,6 +14,35 @@ class LiquidGlassBrowser(unittest.IsolatedAsyncioTestCase):
  asyncTearDown=harness.RedesignBrowser.asyncTearDown
  route=harness.RedesignBrowser.route
  panel=harness.RedesignBrowser.nav
+
+ async def test_ambient_light_changes_pixels_inside_translucent_panel(self):
+  shots=Path('/tmp/plus-football-liquid-glass');shots.mkdir(exist_ok=True)
+  metrics={}
+  await self.panel('kedudukan')
+  for width in [375,390,430]:
+   await self.page.set_viewport_size({'width':width,'height':844})
+   await self.page.evaluate('window.scrollTo(0,0)');await self.page.wait_for_timeout(400)
+   panel=self.page.locator('#kedudukan .standings-panel')
+   self.assertEqual(await panel.evaluate('(e)=>getComputedStyle(e).backdropFilter'),'blur(8px)')
+   self.assertEqual(await self.page.locator('#main').evaluate('(e)=>getComputedStyle(e).overflow'),'visible')
+   self.assertEqual(await self.page.locator('#main').evaluate('(e)=>getComputedStyle(e).filter'),'none')
+   self.assertEqual(await self.page.locator('.ambient-lights').evaluate('(e)=>getComputedStyle(e).position'),'absolute')
+   self.assertEqual(await panel.locator('h3').evaluate('(e)=>getComputedStyle(e).filter'),'none')
+   on=await panel.screenshot(path=str(shots/f'ambient-card-{width}.png'))
+   await self.page.locator('.ambient-lights').evaluate('(e)=>e.hidden=true')
+   off=await panel.screenshot(path=str(shots/f'ambient-card-disabled-{width}.png'))
+   await self.page.locator('.ambient-lights').evaluate('(e)=>e.hidden=false')
+   a,b=Image.open(io.BytesIO(on)).convert('RGB'),Image.open(io.BytesIO(off)).convert('RGB')
+   # Interior central area, excluding borders/edge glow; text is identical.
+   w,h=a.size;crop=(int(w*.2),int(h*.2),int(w*.8),int(h*.6))
+   lit=ImageStat.Stat(a.crop(crop)).mean;unlit=ImageStat.Stat(b.crop(crop)).mean
+   delta=[round(x-y,2) for x,y in zip(lit,unlit)]
+   self.assertGreater(delta[0],10,f'{width}: light must visibly change card INTERIOR {delta}')
+   self.assertGreater(delta[0]-delta[1],6,f'{width}: ambient contribution must be burgundy/red {delta}')
+   metrics[width]={'interiorRGBWithLight':lit,'interiorRGBWithoutLight':unlit,'deltaRGB':delta}
+   await self.page.evaluate('window.scrollTo(0,0)');await self.page.wait_for_timeout(350)
+   await self.page.screenshot(path=str(shots/f'ambient-{width}.png'))
+  (shots/'ambient-pixel-evidence.json').write_text(json.dumps(metrics,indent=2))
 
  async def test_dock_stays_at_viewport_bottom_and_all_panels_work(self):
   shots=Path('/tmp/plus-football-liquid-glass');shots.mkdir(exist_ok=True)

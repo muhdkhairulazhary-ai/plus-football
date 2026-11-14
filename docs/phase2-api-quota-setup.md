@@ -68,6 +68,10 @@ migrasi atau deployment telah diaktifkan oleh perubahan ini.
 - Host/endpoint tetap, redirect ditolak, timeout keseluruhan 9 saat termasuk
   body. Body JSON maksimum 96 KiB; data besar ditolak dan tidak dipotong sebagai
   kejayaan. Had ini boleh menolak sesetengah hari yang mempunyai banyak fixture.
+- Fetch menggunakan `redirect: 'manual'` yang disokong workerd. Semua status
+  300–399 ditolak sebagai 502 dan body dibatalkan sebelum parsing/cache;
+  `Location` tidak dipulangkan atau diikuti. `redirect: 'error'` tidak disokong
+  workerd walaupun mock Node menerimanya.
 - Validasi bentuk respons, bilangan hasil, ID, nama, tarikh dan skor. Hanya
   medan yang digunakan UI dipulangkan. Respons rosak/provider error tidak
   disimpan sebagai kejayaan. Payload yang mengandungi credential juga ditolak.
@@ -137,3 +141,25 @@ Semua upstream dimock. Storage mock melaksanakan transaksi bersiri, rollback
 dan replay; masa dikawal. Ujian turut menggunakan handler tarikh sebenar UI.
 Tiada token production diperlukan. Ujian bukan pengganti semakan platform
 Cloudflare serta pengesahan setup selepas kelulusan.
+
+### Ujian runtime tempatan (tanpa deploy)
+
+Gunakan toolchain dipinkan `wrangler@4.162.0`, termasuk Miniflare
+`5.20261113.0-beta` dan workerd `1.20261113.1` yang dibekalkan bersamanya.
+Pasang alat di direktori sementara berasingan, bukan projek atau global:
+
+```sh
+npm install --prefix /tmp/plus-football-phase2-runtime --no-audit --no-fund wrangler@4.162.0
+PHASE2_RUNTIME_TOOLS=/tmp/plus-football-phase2-runtime node --test --test-isolation=none tests/phase2.runtime.mjs
+```
+
+Harness memuatkan kod Worker dan Pages sebenar, membina binding DO tempatan
+dan storage SQLite di direktori sementara, kemudian membersihkannya. Semua
+outbound fetch dipintas; destinasi tidak dijangka ditolak tanpa network
+fallback. Ia hanya menggunakan credential palsu dan bajet ujian sementara;
+template Worker kekal 0. Tiada login atau deployment diperlukan. Sediakan
+cache npm di direktori writable jika persekitaran memerlukannya.
+
+Ujian merangkumi kejayaan/0–0, concurrency, cache, bajet 0, restart SQLite dan
+301/302/303/307/308 dengan Location ke origin berbeza serta JSON yang nampak
+sah. Ini tidak membuktikan tetapan binding atau bil akaun Cloudflare sebenar.

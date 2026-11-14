@@ -167,8 +167,15 @@ export class FootballQuota {
   async upstream(date, signal) {
     const response = await fetch('https://v3.football.api-sports.io/fixtures?date=' + date, {
       headers: {'x-apisports-key': this.env.API_FOOTBALL_KEY, accept: 'application/json'},
-      signal, redirect: 'error'
+      signal, redirect: 'manual'
     });
+    // workerd supports manual/follow only. Never follow a provider redirect:
+    // the credential must stay on the fixed provider origin, and even a 3xx
+    // response containing otherwise valid fixture JSON is not trusted data.
+    if (response.status >= 300 && response.status < 400) {
+      await response.body?.cancel();
+      return {status: 502};
+    }
     if (response.status === 429) return {status: 429, retry: retrySeconds(response.headers.get('Retry-After'), Date.now())};
     if (!response.ok) return {status: 502};
     const data = await readJSON(response);

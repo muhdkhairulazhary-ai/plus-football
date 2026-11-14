@@ -8,6 +8,26 @@ import {harness, MockStorage, validPayload, until, onRequestGet} from './helpers
 const query = date => 'endpoint=fixtures&date=' + date;
 const use = (t, options) => { const h = harness(options); t.after(() => h.close()); return h; };
 
+for (const status of [301, 302, 303, 307, 308]) {
+  test(`provider HTTP ${status} is not followed, parsed or cached`, async t => {
+    const h = use(t, {budget: 1, provider: async () => Response.json(validPayload(), {
+      status, headers: {Location: 'https://redirect.invalid/private-destination'}
+    })});
+    const response = await h.request();
+    assert.equal(response.status, 502);
+    assert.equal(response.headers.get('Location'), null);
+    const body = await response.text();
+    assert(!body.includes('mock-only-credential'));
+    assert(!body.includes('private-destination'));
+    assert.equal(h.calls.length, 1);
+    assert.equal(h.storage.data.get('ledger').used, 1);
+    assert.equal(h.storage.data.has('fixtures:2026-11-13'), false);
+    h.restart();
+    assert.equal((await h.request()).status, 429);
+    assert.equal(h.calls.length, 1);
+  });
+}
+
 test('same date across clients and origins coalesces one upstream attempt', async t => {
   let release;
   const gate = new Promise(resolve => { release = resolve; });

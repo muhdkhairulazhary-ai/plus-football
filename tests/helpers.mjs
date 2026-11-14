@@ -50,7 +50,7 @@ export function harness({budget = 3, provider = async () => Response.json(validP
   const calls = [];
   globalThis.fetch = async (url, options) => {
     assert.match(String(url), /^https:\/\/v3\.football\.api-sports\.io\/fixtures\?date=\d{4}-\d{2}-\d{2}$/);
-    assert.equal(options.redirect, 'error');
+    assert.equal(options.redirect, 'manual');
     assert.equal(options.headers['x-apisports-key'], key);
     calls.push(String(url));
     return provider(url, options);

@@ -192,7 +192,7 @@ class RedesignBrowser(unittest.IsolatedAsyncioTestCase):
  async def test_match_centre_groups_dates_details_and_mobile_widths(self):
   self.mc_mode='mixed';await self.nav('skor');await self.page.locator('.mc-card').first.wait_for()
   for group in ['live','upcoming','finished','other']:self.assertEqual(await self.page.locator(f'.mc-group[data-group="{group}"] .mc-card').count(),1)
-  self.assertIn('Diambil',await self.page.locator('.mc-provenance').inner_text())
+  self.assertIn('Diambil',await self.page.locator('#scoreContent .mc-provenance').inner_text())
   self.assertEqual(await self.page.locator('.mc-group[data-group="finished"] .mc-team-score').first.inner_text(),'0')
   self.assertEqual(await self.page.locator('.mc-group[data-group="upcoming"] .mc-team-score').first.inner_text(),'—')
   self.assertEqual(await self.page.locator('.mc-group[data-group="live"] .mc-details').count(),0)
@@ -228,7 +228,7 @@ class RedesignBrowser(unittest.IsolatedAsyncioTestCase):
   self.assertEqual(sum('/api/football?' in call for call in self.calls),1)
  async def test_match_centre_partial_empty_malformed_and_retry(self):
   self.mc_mode='partial';await self.nav('skor');await self.page.locator('.mc-card').wait_for()
-  self.assertIn('Sebahagian permintaan gagal',await self.page.locator('.mc-provenance').inner_text())
+  self.assertIn('Sebahagian permintaan gagal',await self.page.locator('#scoreContent .mc-provenance').inner_text())
   self.mc_mode='malformed';await self.page.locator('[data-score="4480"]').click()
   await self.page.wait_for_function('document.querySelector("#scoreContent").textContent.includes("Sambungan tergendala")')
   self.mc_mode='empty';await self.page.locator('#scoreContent .mc-state button').click()
@@ -264,7 +264,7 @@ class RedesignBrowser(unittest.IsolatedAsyncioTestCase):
   await self.page.wait_for_function('document.querySelector("#scoreContent").textContent.includes("Tiada rekod dalam sampel")')
   self.assertEqual(len(self.calls),2)
  async def test_match_centre_historical_live_is_not_current_live(self):
-  self.mc_mode='historical';await self.nav('skor');await self.page.locator('.mc-provenance').wait_for()
+  self.mc_mode='historical';await self.nav('skor');await self.page.locator('#scoreContent .mc-provenance').wait_for()
   await self.page.locator('#matchPrev').click()
   self.assertEqual(await self.page.locator('.mc-group[data-group="live"]').count(),0)
   self.assertEqual(await self.page.locator('.mc-group[data-group="other"] .mc-card').count(),1)

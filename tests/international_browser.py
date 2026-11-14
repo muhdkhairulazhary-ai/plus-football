@@ -33,8 +33,10 @@ class InternationalBrowser(unittest.IsolatedAsyncioTestCase):
   await self.nav('skor');await self.page.locator('[data-score="international"]').click()
 
  async def load(self,provider='api'):
+  await self.page.locator('#internationalDataSources').evaluate('(e)=>e.open=true')
   await self.page.locator('#internationalSource').select_option(provider)
-  await self.page.locator('#internationalLoad').click()
+  await self.page.locator('#internationalDataSources').evaluate('(e)=>e.open=false')
+  await self.page.locator('#internationalRefresh').click()
   await self.page.wait_for_function('document.querySelector("#internationalResults").getAttribute("aria-busy")!=="true"')
 
  async def test_manual_only_filters_flags_and_three_iPhone_widths(self):
@@ -47,8 +49,10 @@ class InternationalBrowser(unittest.IsolatedAsyncioTestCase):
   self.assertEqual(await self.page.locator('#internationalResults [data-match-id="10"] .mc-team-score').first.inner_text(),'0')
   self.assertIn('🇲🇾',await self.page.locator('#internationalResults').inner_text())
   self.assertNotIn('MOCK Club',await self.page.locator('#internationalResults').inner_text())
+  await self.page.locator('#internationalDataSources').evaluate('(e)=>e.open=true')
   await self.page.locator('#internationalKind').select_option('qualifiers');self.assertEqual(await self.page.locator('#internationalResults .mc-card').count(),1)
   await self.page.locator('#internationalKind').select_option('all')
+  await self.page.locator('#internationalDataSources').evaluate('(e)=>e.open=false')
   await self.page.locator('#internationalSearch').fill('Aruba');self.assertEqual(await self.page.locator('#internationalResults .mc-card').count(),1)
   await self.page.locator('#internationalSearch').fill('')
   await self.page.locator('#internationalCompetition').select_option('10');self.assertEqual(await self.page.locator('#internationalResults .mc-card').count(),1)
@@ -61,12 +65,13 @@ class InternationalBrowser(unittest.IsolatedAsyncioTestCase):
   for width in [375,390,430]:
    await self.page.set_viewport_size({'width':width,'height':844})
    self.assertFalse(await self.page.evaluate('document.documentElement.scrollWidth>innerWidth'))
-   await self.page.evaluate('window.scrollTo(0,0)');await self.page.screenshot(path=str(shots/f'international-{width}.png'),full_page=True)
-   for control in ['internationalLoad','internationalSearch','internationalSource']:
+   await self.page.evaluate('document.querySelector(".app-scroll").scrollTo(0,0)');await self.page.screenshot(path=str(shots/f'international-{width}.png'),full_page=True)
+   for control in ['internationalRefresh','internationalSearch','internationalCompetition']:
     r=await self.page.locator('#'+control).bounding_box();self.assertGreaterEqual(r['height'],44)
 
  async def test_MYT_rollover_and_country_search_do_not_spend_another_request(self):
   await self.open_international();await self.load();before=len(self.calls)
+  await self.page.locator('#internationalDataSources').evaluate('(e)=>e.open=true')
   await self.page.locator('#internationalDate').fill((await self.page.locator('#internationalQueryDate').input_value()))
   await self.page.locator('#internationalDate').evaluate('(e)=>{const d=new Date(e.value+"T12:00:00Z");d.setUTCDate(d.getUTCDate()+1);e.value=d.toISOString().slice(0,10);e.dispatchEvent(new Event("change"))}')
   self.assertEqual(await self.page.locator('#internationalResults .mc-card').count(),1)
@@ -93,24 +98,26 @@ class InternationalBrowser(unittest.IsolatedAsyncioTestCase):
 
  async def test_rate_limit_and_malformed_responses_are_manual_errors(self):
   await self.open_international();self.limited=True;before=len(self.calls);await self.load()
-  self.assertIn('Had semakan',await self.page.locator('#internationalResults').inner_text());self.assertIn('180',await self.page.locator('#internationalLoad').inner_text());self.assertEqual(len(self.calls),before+1)
+  self.assertIn('Had semakan',await self.page.locator('#internationalResults').inner_text());self.assertIn('3 minit',await self.page.locator('#internationalCooldown').inner_text());self.assertEqual(len(self.calls),before+1)
   await self.page.reload();await self.open_international();self.limited=False;self.malformed=True;await self.load()
   self.assertIn('tidak sah',await self.page.locator('#internationalResults').inner_text());self.assertEqual(await self.page.locator('#internationalResults .mc-card').count(),0)
 
  async def test_pending_filter_change_and_tab_switch_do_not_render_old_response(self):
-  await self.open_international();self.gate=asyncio.Event();await self.page.locator('#internationalLoad').click()
+  await self.open_international();self.gate=asyncio.Event();await self.page.locator('#internationalRefresh').click()
   await self.page.locator('#internationalSearch').fill('Japan');self.assertTrue(await self.page.locator('#internationalResults .skeleton').is_visible())
   await self.page.locator('[data-score="4328"]').click();self.gate.set();await self.page.wait_for_timeout(150)
   self.assertTrue(await self.page.locator('#internationalPanel').is_hidden())
+  before=len(self.calls)
   await self.page.locator('[data-score="international"]').click()
-  self.assertEqual(await self.page.locator('#internationalResults .mc-card').count(),0)
+  self.assertEqual(await self.page.locator('#internationalResults .mc-card').count(),1)
+  self.assertEqual(len(self.calls),before)
 
  async def test_empty_sample_is_not_a_claim_that_no_matches_exist(self):
   self.empty=True;await self.open_international();await self.load()
   self.assertIn('tidak mengesahkan',await self.page.locator('#internationalResults').inner_text())
   self.assertEqual(await self.page.locator('#internationalResults .mc-card').count(),0)
   await self.page.reload();self.empty=False;self.limited=True;await self.open_international();await self.load('sports')
-  self.assertIn('180',await self.page.locator('#internationalLoad').inner_text())
+  self.assertIn('3 minit',await self.page.locator('#internationalCooldown').inner_text())
 
  async def test_snapshot_expires_without_polling_or_showing_stale_scores(self):
   await self.page.clock.install();await self.open_international();await self.load();before=len(self.calls)
@@ -129,5 +136,61 @@ class InternationalBrowser(unittest.IsolatedAsyncioTestCase):
   await self.page.clock.fast_forward(61000);await self.load()
   self.assertEqual(len([url for url in self.calls if '/api/football?' in url]),before)
   self.assertGreater(await self.page.locator('#internationalResults .mc-card').count(),0)
+
+ async def test_fixture_first_compact_days_and_on_demand_cooldown(self):
+  await self.open_international();await self.load();before=len(self.calls)
+  self.assertFalse(await self.page.locator('#internationalDataSources').evaluate('(e)=>e.open'))
+  for ident in ['internationalSource','internationalQueryDate','internationalKind']:
+   self.assertTrue(await self.page.locator('#'+ident).is_hidden())
+  self.assertTrue(await self.page.locator('#internationalCooldown').is_hidden())
+  await self.page.locator('#internationalRefresh').click()
+  self.assertIn('Cuba lagi',await self.page.locator('#internationalCooldown').inner_text());self.assertEqual(len(self.calls),before)
+  for offset,count in [('-1',0),('0',3),('1',1)]:
+   await self.page.locator(f'[data-international-offset="{offset}"]').click()
+   self.assertEqual(await self.page.locator('#internationalResults .mc-card').count(),count)
+   self.assertEqual(await self.page.locator(f'[data-international-offset="{offset}"]').get_attribute('aria-pressed'),'true')
+  self.assertEqual(len(self.calls),before)
+  self.assertTrue(await self.page.locator('#internationalResults').evaluate('(e)=>!!(e.compareDocumentPosition(document.getElementById("internationalDataSources"))&Node.DOCUMENT_POSITION_FOLLOWING)'))
+
+ async def test_dock_has_its_own_space_and_all_controls_are_scroll_accessible(self):
+  await self.open_international();await self.load()
+  shots=Path('/tmp/plus-football-international');shots.mkdir(exist_ok=True)
+  for width in [375,390,430]:
+   await self.page.set_viewport_size({'width':width,'height':844})
+   pane=self.page.locator('#appScroll');dock=self.page.locator('.primary-nav')
+   pr,dr=await pane.bounding_box(),await dock.bounding_box()
+   self.assertLessEqual(pr['y']+pr['height'],dr['y']-4,'Dock must be outside content viewport')
+   await pane.evaluate('(e)=>e.scrollTop=0')
+   first=await self.page.locator('#internationalResults .mc-card').first.bounding_box()
+   self.assertLess(first['y']+80,pr['y']+pr['height'],'First fixture must be visible before source settings')
+   await self.page.screenshot(path=str(shots/f'compact-{width}.png'))
+   await pane.focus();await self.page.keyboard.press('PageDown');await self.page.wait_for_timeout(300)
+   self.assertGreater(await pane.evaluate('(e)=>e.scrollTop'),0,'Keyboard must scroll the native content pane')
+   await self.page.locator('#internationalDataSources').evaluate('(e)=>e.open=true')
+   for ident in ['internationalSearch','internationalCompetition','internationalSource','internationalQueryDate','internationalDate','internationalKind','installButton']:
+    control=self.page.locator('#'+ident);await control.scroll_into_view_if_needed();await control.focus()
+    r=await control.bounding_box()
+    self.assertGreaterEqual(r['y'],pr['y']-1);self.assertLessEqual(r['y']+r['height'],pr['y']+pr['height']+1)
+    self.assertTrue(await control.evaluate('(e)=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}'),ident)
+   self.assertGreater(await pane.evaluate('(e)=>e.scrollTop'),0)
+   self.assertFalse(await pane.evaluate('(e)=>e.scrollWidth>e.clientWidth'))
+   await self.page.locator('#internationalDataSources').evaluate('(e)=>e.open=false')
+  # A shorter viewport approximates browser chrome/keyboard space; real Safari
+  # keyboard and hardware safe areas still need physical-device verification.
+  await self.page.set_viewport_size({'width':390,'height':620})
+  await self.page.locator('#internationalDataSources').evaluate('(e)=>e.open=true')
+  await self.page.locator('#internationalDate').focus();await self.page.locator('#internationalDate').scroll_into_view_if_needed()
+  pr,dr=await self.page.locator('#appScroll').bounding_box(),await self.page.locator('.primary-nav').bounding_box()
+  self.assertLessEqual(pr['y']+pr['height'],dr['y']-4)
+  await self.page.keyboard.press('Tab')
+  self.assertTrue(await self.page.evaluate('document.getElementById("appScroll").contains(document.activeElement)'))
+
+ async def test_fresh_club_cache_is_visible_on_open_without_another_API_call(self):
+  await self.nav('skor');await self.page.locator('.free-api-panel summary').click();await self.page.locator('#apiMatchCheck').click()
+  await self.page.wait_for_function('document.querySelector("#apiMatchResults").textContent.includes("Tarikh pertanyaan")')
+  before=len(self.calls);await self.page.locator('[data-score="international"]').click()
+  self.assertEqual(await self.page.locator('#internationalResults .mc-card').count(),3);self.assertEqual(len(self.calls),before)
+  await self.nav('berita');self.assertTrue(await self.page.locator('.ticker').is_visible())
+  await self.nav('skor');self.assertEqual(len(self.calls),before);self.assertTrue(await self.page.locator('.ticker').is_hidden())
 
 if __name__=='__main__':unittest.main(verbosity=2)

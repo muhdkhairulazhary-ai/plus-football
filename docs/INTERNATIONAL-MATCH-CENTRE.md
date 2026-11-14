@@ -5,9 +5,18 @@ Base: main `f1ef6c8` (includes Liquid Glass and article 17). Branch:
 
 ## Scope and data integrity
 
-Open Live Score → **ANTARABANGSA**. Select provider and a UTC query date, then
-explicitly load one date-wide sample. Select a MYT display date, country/team
-search, type or returned competition to filter it without further requests.
+Open Live Score → **ANTARABANGSA**. Fixtures come before a collapsed **Data &
+Sources** section. Use **Semalam / Hari ini / Esok** (yesterday/today/tomorrow),
+compact country search and the returned competition filter. **Kemas kini** is the
+explicit manual refresh; opening the view and changing filters never fetches.
+Fresh in-memory samples from club/international lookups are reused on opening.
+There is no invented first-load schedule when no fresh cache exists.
+
+Provider choice, arbitrary MYT dates, UTC query dates, type filter, timestamps and
+quota details remain available inside Data & Sources. A successful refresh does
+not put a countdown above fixtures. A short wait message appears after a blocked
+refresh attempt or a rate-limit failure; detailed cooldown status stays collapsed.
+The single primary coverage note is “Liputan percuma mungkin tidak lengkap.”
 There is no country allowlist: any team returned in an identified national
 competition is eligible, including small nations. This is not a promise of
 fixtures for every country or a complete global schedule.
@@ -55,8 +64,9 @@ no football endpoint, API key, provider account or production API was used):
 
 The query is a provider UTC day. MYT is UTC+8, so a full MYT day can span two UTC
 queries. The UI does not silently fetch the adjacent UTC date; another query
-requires a separate manual click after the cooldown and replaces the visible
-sample. An exact competition filter is populated only from returned records.
+requires a separate manual click after the cooldown. Fresh samples from
+manually loaded UTC dates are combined in memory for MYT filtering; they never
+extend their original two-minute freshness. No adjacent UTC date is auto-fetched. An exact competition filter is populated only from returned records.
 Country/team search searches loaded provider names, not a global team directory.
 Unrecognized competition spellings can cause conservative omissions; expand
 classification using documented/tested labels rather than blindly accepting World
@@ -122,8 +132,11 @@ PYTHONDONTWRITEBYTECODE=1 python tests/liquid_glass_browser.py
 All fixture responses are mocks. Tests cover classification, flags, MYT rollover,
 missing/zero scores, no club leakage, local filters, shared cache/cooldown,
 in-flight deduplication, 429/timeout/malformed responses, offline races, expiry,
-club switching and 375/390/430px overflow/tap targets. Screenshots:
-`/tmp/plus-football-international/international-{width}.png`.
+club switching and 375/390/430px overflow/tap targets. UX tests also cover
+collapsed sources, zero-call cache reuse, yesterday/today/tomorrow filtering,
+small on-demand cooldown notices and dock/scroll accessibility. Screenshots:
+`/tmp/plus-football-international/international-{width}.png` and
+`compact-{width}.png`.
 Environment: preinstalled Node, Python Playwright/Chromium, Pillow. Physical iPhone
 Safari/WebKit, actual provider completeness and remaining account quota are
 unverified. No Lighthouse/device scrolling score is claimed.
@@ -132,3 +145,26 @@ For review: Cloudflare → Workers & Pages → **plusfootball** → Deployments 
 Preview matching this branch/SHA, if Git integration creates one. Do not promote
 to production or enable a paid plan. No merge or deployment command is part of
 this branch task.
+
+## iPhone scroll and dock layout
+
+On mobile widths the body uses a dynamic-viewport flex layout. `#appScroll`
+contains ticker, main and footer in its own native scroll pane. A reserved bottom
+row of 94px plus the hardware safe-area inset sits below that pane; the floating
+dock occupies that row. Thus the scroll viewport ends above the dock instead of
+letting controls move underneath a fixed overlay. The scroll pane is keyboard-focusable with a visible focus outline. No scroll/resize listener,
+fixed full-screen blur or JavaScript viewport resizing is introduced. The header
+remains unfiltered on mobile, preserving viewport anchoring of its fixed dock.
+Desktop retains regular document scrolling and header navigation.
+
+View navigation resets both the mobile scroll pane and the document. Native
+focus/scrollIntoView can reveal controls, footer installation links and the
+Data & Sources fields above the dock; article dialogs retain their own scrolling
+and focus trap. The ticker and redundant Match Centre heading are hidden only
+in the compact mobile international view, returning on other views. Article
+content and breaking-news behavior are retained.
+
+Tests measure nonintersecting dock/scroll bounds, focus and hit testing of lower
+controls and footer actions at 375/390/430px, plus a shorter 620px viewport.
+Physical Safari keyboard/toolbar behavior and real hardware safe areas remain
+preview checks; Chromium viewport emulation is not a hardware Safari test.

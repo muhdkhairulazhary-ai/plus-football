@@ -21,26 +21,29 @@ class LiquidGlassBrowser(unittest.IsolatedAsyncioTestCase):
   await self.panel('kedudukan')
   for width in [375,390,430]:
    await self.page.set_viewport_size({'width':width,'height':844})
-   await self.page.evaluate('window.scrollTo(0,0)');await self.page.wait_for_timeout(400)
+   await self.page.evaluate('document.querySelector(".app-scroll").scrollTo(0,0)');await self.page.wait_for_timeout(400)
    panel=self.page.locator('#kedudukan .standings-panel')
    self.assertEqual(await panel.evaluate('(e)=>getComputedStyle(e).backdropFilter'),'blur(8px)')
    self.assertEqual(await self.page.locator('#main').evaluate('(e)=>getComputedStyle(e).overflow'),'visible')
    self.assertEqual(await self.page.locator('#main').evaluate('(e)=>getComputedStyle(e).filter'),'none')
    self.assertEqual(await self.page.locator('.ambient-lights').evaluate('(e)=>getComputedStyle(e).position'),'absolute')
    self.assertEqual(await panel.locator('h3').evaluate('(e)=>getComputedStyle(e).filter'),'none')
-   on=await panel.screenshot(path=str(shots/f'ambient-card-{width}.png'))
+   await self.page.locator('#appScroll').evaluate('(e)=>e.scrollTop=0')
+   r=await panel.bounding_box();pane=await self.page.locator('#appScroll').bounding_box()
+   crop=(int(r['x']+r['width']*.2),int(max(r['y']+100,pane['y']+40)),int(r['x']+r['width']*.8),int(min(r['y']+r['height']-30,pane['y']+pane['height']-25)))
+   on=await self.page.screenshot(path=str(shots/f'ambient-card-{width}.png'))
    await self.page.locator('.ambient-lights').evaluate('(e)=>e.hidden=true')
-   off=await panel.screenshot(path=str(shots/f'ambient-card-disabled-{width}.png'))
+   off=await self.page.screenshot(path=str(shots/f'ambient-card-disabled-{width}.png'))
    await self.page.locator('.ambient-lights').evaluate('(e)=>e.hidden=false')
    a,b=Image.open(io.BytesIO(on)).convert('RGB'),Image.open(io.BytesIO(off)).convert('RGB')
    # Interior central area, excluding borders/edge glow; text is identical.
-   w,h=a.size;crop=(int(w*.2),int(h*.2),int(w*.8),int(h*.6))
+   self.assertGreater(crop[3],crop[1])
    lit=ImageStat.Stat(a.crop(crop)).mean;unlit=ImageStat.Stat(b.crop(crop)).mean
    delta=[round(x-y,2) for x,y in zip(lit,unlit)]
    self.assertGreater(delta[0],10,f'{width}: light must visibly change card INTERIOR {delta}')
    self.assertGreater(delta[0]-delta[1],6,f'{width}: ambient contribution must be burgundy/red {delta}')
    metrics[width]={'interiorRGBWithLight':lit,'interiorRGBWithoutLight':unlit,'deltaRGB':delta}
-   await self.page.evaluate('window.scrollTo(0,0)');await self.page.wait_for_timeout(350)
+   await self.page.evaluate('document.querySelector(".app-scroll").scrollTo(0,0)');await self.page.wait_for_timeout(350)
    await self.page.screenshot(path=str(shots/f'ambient-{width}.png'))
   (shots/'ambient-pixel-evidence.json').write_text(json.dumps(metrics,indent=2))
 
@@ -50,7 +53,7 @@ class LiquidGlassBrowser(unittest.IsolatedAsyncioTestCase):
    await self.page.set_viewport_size({'width':width,'height':844})
    for view in ['berita','skor','kedudukan','perlawanan']:
     await self.panel(view)
-    await self.page.evaluate('window.scrollTo(0,document.documentElement.scrollHeight)')
+    await self.page.evaluate('document.querySelector(".app-scroll").scrollTo(0,document.querySelector(".app-scroll").scrollHeight)')
     await self.page.wait_for_timeout(350)
     nav=self.page.locator('.primary-nav');r=await nav.bounding_box()
     self.assertGreater(r['y'],700);self.assertLessEqual(r['y']+r['height'],833)
@@ -59,7 +62,7 @@ class LiquidGlassBrowser(unittest.IsolatedAsyncioTestCase):
     for link in await nav.locator('a').all():
      size=await link.bounding_box();self.assertGreaterEqual(size['height'],44);self.assertGreaterEqual(size['width'],44)
      self.assertTrue(await link.evaluate('(a)=>{const r=a.getBoundingClientRect();return a.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}'))
-    await self.page.evaluate('window.scrollTo(0,0)');await self.page.wait_for_timeout(300)
+    await self.page.evaluate('document.querySelector(".app-scroll").scrollTo(0,0)');await self.page.wait_for_timeout(300)
     await self.page.screenshot(path=str(shots/f'{view}-{width}.png'))
    await self.panel('berita')
    await self.page.locator('#featuredStory button').first.click()

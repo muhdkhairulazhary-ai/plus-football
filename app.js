@@ -65,6 +65,8 @@ function showError(box,message,retry){const state=document.createElement('div');
 let scoreRequest=0,fixtureRequest=0;
 function safeText(tag,value){const e=document.createElement(tag);e.textContent=String(value??'—');return e}function loadScores(league){
  const international=league==='international';
+ document.getElementById('skor').classList.toggle('international-active',international);
+ document.body.classList.toggle('international-view',international&&!document.getElementById('skor').hidden);
  document.getElementById('clubMatchToolbar').hidden=international;document.getElementById('clubMatchResults').hidden=international;
  if(international){apiRequestVersion++;apiResults.replaceChildren();matchCentre.suspend();internationalCentre.show();document.querySelectorAll('[data-score]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.score===league)));return}
  internationalCentre.hide();return matchCentre.loadLeague(league);
@@ -126,9 +128,11 @@ const loadedViews=new Set();
 function showView(id){
  if(!views.includes(id))id='berita';
  views.forEach(view=>$(view).hidden=view!==id);
+ document.body.classList.toggle('international-view',id==='skor'&&$('skor').classList.contains('international-active'));
  $('homeLead').hidden=id!=='berita'||active!=='Semua'||$('search').value.length>0;
  document.querySelectorAll('[data-view]').forEach(a=>{if(a.dataset.view===id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
  if(!loadedViews.has(id)){loadedViews.add(id);if(id==='skor')loadScores('4328');if(id==='perlawanan')showFixtures('epl');}
+ document.getElementById('appScroll').scrollTo({top:0,behavior:'auto'});
  window.scrollTo({top:0,behavior:'auto'});
 }
 function renderLead(){

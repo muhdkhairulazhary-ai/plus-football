@@ -57,6 +57,13 @@ test('invalid dates and offline state never consume quota',async()=>{
  let calls=0;const client=C.create({online:()=>false,fetchImpl:()=>{calls++}});
  await assert.rejects(client.fixtures('2026-02-29'),e=>e.code==='date');await assert.rejects(client.fixtures('2026-11-14'),e=>e.code==='offline');assert.equal(calls,0);
 });
+test('cache-only inspection never fetches, extends freshness or returns offline data',async()=>{
+ let calls=0,clock=1000000,online=true;
+ const client=C.create({now:()=>clock,online:()=>online,fetchImpl:async()=>{calls++;return Response.json({response:[fixture()]})}});
+ assert.equal(client.cachedFixtures().length,0);await client.fixtures('2026-11-14');assert.equal(client.cachedFixtures().length,1);
+ assert.equal(client.cachedFixtures()[0].at,clock);assert.equal(calls,1);
+ online=false;assert.equal(client.cachedFixtures().length,0);online=true;clock+=120001;assert.equal(client.cachedFixtures().length,0);assert.equal(calls,1);
+});
 test('429 Retry-After seconds and HTTP dates protect subsequent calls',async()=>{
  for(const retry of ['180',new Date(1000000+240000).toUTCString()]){
   let calls=0;const client=C.create({now:()=>1000000,online:()=>true,fetchImpl:async()=>{calls++;return new Response('',{status:429,headers:{'Retry-After':retry}})}});

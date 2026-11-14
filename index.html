@@ -54,6 +54,7 @@
 </div>
 </nav>
 </header>
+<div class="app-scroll" id="appScroll" tabindex="0" role="region" aria-label="Kandungan plus+ Football">
 <div class="ticker">
 <div class="wrap">
 <span class="breaking-label">BREAKING NEWS</span>
@@ -136,23 +137,28 @@
 <p class="standings-note">Sumber TheSportsDB (API percuma). Keputusan mungkin lewat; setiap permintaan liga hanya mengembalikan sebahagian kecil perlawanan. Bukan skor langsung masa nyata.</p>
 </div>
 <section id="internationalPanel" hidden aria-labelledby="internationalTitle">
-<h3 id="internationalTitle">ANTARABANGSA · PASUKAN KEBANGSAAN</h3>
-<p class="standings-note">Persahabatan, kelayakan Piala Dunia / benua dan kejohanan yang dapat dikenal pasti dalam sampel pembekal. Semua negara yang dipulangkan boleh dicari; liputan percuma bukan senarai penuh. Skor mungkin lewat.</p>
+<div class="international-heading"><h2 id="internationalTitle">Antarabangsa</h2><button type="button" id="internationalRefresh" class="international-refresh">Kemas kini ↻</button></div>
+<div class="international-days" role="group" aria-label="Tarikh perlawanan"><button type="button" data-international-offset="-1">Semalam</button><button type="button" data-international-offset="0">Hari ini</button><button type="button" data-international-offset="1">Esok</button></div>
+<div class="international-date-caption" id="internationalDateCaption"></div>
+<div class="international-filters"><label><span class="visually-hidden">Cari negara / pasukan</span><input type="search" id="internationalSearch" placeholder="Cari negara / pasukan" maxlength="100"></label><label><span class="visually-hidden">Pertandingan</span><select id="internationalCompetition"><option value="all">Semua pertandingan</option></select></label></div>
+<p class="international-coverage-note">Liputan percuma mungkin tidak lengkap.</p>
+<p id="internationalCooldown" class="international-cooldown" role="status" hidden></p>
+<div id="internationalResults" class="standings-content" aria-live="polite"></div>
+<details id="internationalDataSources" class="international-data-sources">
+<summary>Data &amp; Sources</summary>
+<div id="internationalProvenance" class="mc-provenance"></div>
 <div class="international-controls">
 <label>Sumber<select id="internationalSource"><option value="api">API-Football · manual</option><option value="sports">TheSportsDB · sampel percuma</option></select></label>
-<label>Tarikh pertanyaan pembekal · UTC<input type="date" id="internationalQueryDate"></label>
-<button type="button" class="pill" id="internationalLoad">MUAT SAMPEL TARIKH</button>
-</div>
-<p class="standings-note">Setiap muatan boleh menggunakan kuota. Tiada muatan automatik atau permintaan untuk setiap negara. Sampel API-Football dikongsi dengan semakan liga; had antara cubaan sekurang-kurangnya 60 saat.</p>
-<div class="international-controls">
-<label>Tarikh paparan · MYT<input type="date" id="internationalDate"></label>
-<label>Cari negara / pasukan<input type="search" id="internationalSearch" placeholder="Malaysia, Japan, Brazil…" maxlength="100"></label>
+<label>Tarikh sumber · UTC<input type="date" id="internationalQueryDate"></label>
+<label>Tarikh lain · MYT<input type="date" id="internationalDate"></label>
 <label>Jenis pertandingan<select id="internationalKind"><option value="all">Semua jenis</option><option value="friendlies">Persahabatan</option><option value="qualifiers">Kelayakan</option><option value="tournaments">Kejohanan</option></select></label>
-<label>Pertandingan dalam sampel<select id="internationalCompetition"><option value="all">Semua pertandingan tersedia</option></select></label>
+<button type="button" class="pill" id="internationalLoad">Muat tarikh sumber</button>
 </div>
-<p id="internationalCoverage" class="standings-note">Penapis hanya menapis sampel yang dimuatkan, tanpa panggilan baharu. Tarikh UTC dan MYT boleh berbeza; tiada pertanyaan hari tambahan dibuat secara automatik.</p>
-<div id="internationalResults" class="standings-content" aria-live="polite"></div>
+<p id="internationalDataCooldown" class="international-cooldown" role="status" hidden></p>
+<p class="standings-note">Muatan baharu boleh menggunakan kuota. Tiada muatan automatik; cubaan API-Football dikongsi dengan semakan liga dan dijarakkan sekurang-kurangnya 60 saat.</p>
+<p id="internationalCoverage" class="standings-note">Carian dan penapis hanya menapis data tersedia. Satu hari MYT boleh merentasi dua tarikh sumber UTC; tiada pertanyaan tambahan dibuat secara automatik.</p>
 <a href="https://www.fifa.com/" class="mc-official" target="_blank" rel="noopener noreferrer">SEMAK SUMBER RASMI FIFA ↗</a>
+</details>
 </section>
 </div>
 </section>
@@ -217,6 +223,7 @@
 <button type="button" id="installButton" class="install-button">Pasang di iPhone</button>
 </div>
 </footer>
+</div>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
 <div class="modal-inner" tabindex="-1">
 <button class="close" id="close" aria-label="Tutup artikel">×</button>

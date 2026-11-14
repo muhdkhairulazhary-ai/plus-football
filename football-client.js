@@ -28,7 +28,7 @@
    pending.set(day,work);try{return await work}finally{if(pending.get(day)===work)pending.delete(day)}
   }
   function invalidate(){epoch++;cache.clear();pending.clear()}
-  return Object.freeze({fixtures,invalidate,get blockedUntil(){return blockedUntil},subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}});
+  return Object.freeze({fixtures,invalidate,cachedFixtures(){return online()?[...cache].filter(([,entry])=>now()-entry.at<120000).map(([day,entry])=>({day,...entry})):[]},get blockedUntil(){return blockedUntil},subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}});
  }
  globalThis.PlusFootballClient=Object.freeze({create});
 })();

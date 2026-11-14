@@ -77,3 +77,10 @@ latest main `f1ef6c8`, including article 17 and the uploaded JPEG.
 node --test --test-isolation=none tests/international.test.mjs
 PYTHONDONTWRITEBYTECODE=1 python tests/international_browser.py
 ```
+
+International UX follow-up: browser checks also verify fixtures before collapsed
+Data & Sources, local yesterday/today/tomorrow navigation, cache-only opening,
+small cooldown notices and a reserved mobile dock region. Lower source controls
+and footer actions are focused/hit-tested above the dock at all three widths,
+with an additional short-viewport keyboard focus check. Desktop keeps normal
+page scrolling. Screenshot paths include `compact-{width}.png`.
